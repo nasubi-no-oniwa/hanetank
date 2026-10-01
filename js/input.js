@@ -66,6 +66,12 @@
       window.addEventListener('pointermove', e => this.move(e));
       window.addEventListener('pointerup', e => this.up(e));
       window.addEventListener('pointercancel', e => this.up(e, true));
+      // スマホの指はタッチイベントで受け取る（iPhoneで指を離したのが届かず、スティックが固まるのを防ぐ）
+      const opt = { passive: false };
+      L.addEventListener('touchstart', e => this.tStart(e), opt);
+      window.addEventListener('touchmove', e => this.tMove(e), opt);
+      window.addEventListener('touchend', e => this.tEnd(e, false), opt);
+      window.addEventListener('touchcancel', e => this.tEnd(e, true), opt);
     }
 
     // ---------- マウス / タッチ ----------
@@ -81,18 +87,61 @@
         if (e.button === 2) this.pending[0].mine = true;
         return;
       }
-      // タッチ（ペンも同じ扱い）
-      this.lastDevice = 'touch';
-      e.preventDefault();
-      if (this.onPlaceClick) { this.onPlaceClick(e.clientX, e.clientY, 0); return; }
-      if (!this.enabled) return;
-      const leftSide = e.clientX < window.innerWidth * 0.45;
-      if (leftSide && !this.touchMove) {
-        this.touchMove = { id: e.pointerId, ox: e.clientX, oy: e.clientY, x: e.clientX, y: e.clientY };
-      } else if (!leftSide && !this.touchAim) {
-        this.touchAim = { id: e.pointerId, ox: e.clientX, oy: e.clientY, x: e.clientX, y: e.clientY, t: performance.now(), dragging: false };
+      // 指・ペンはタッチイベントのほうで扱う
+    }
+    // 今も画面に触れている指の一覧と照らし合わせて、離れたはずの指を片づける
+    prune(e, cancel) {
+      const alive = new Set(Array.from(e.touches || []).map(t => t.identifier));
+      if (this.touchMove && !alive.has(this.touchMove.id)) this.touchMove = null;
+      if (this.touchAim && !alive.has(this.touchAim.id)) {
+        if (this.enabled && !cancel) this.pending[0].fire = true;
+        this.touchAim = null;
       }
-      try { this.layer.setPointerCapture(e.pointerId); } catch (err) {}
+    }
+    tStart(e) {
+      HT.Sound.init();
+      e.preventDefault();
+      this.lastDevice = 'touch';
+      this.prune(e, true);
+      for (const t of Array.from(e.changedTouches)) {
+        const x = t.clientX, y = t.clientY, id = t.identifier;
+        if (this.onPlaceClick) { this.onPlaceClick(x, y, 0); continue; }
+        if (!this.enabled) continue;
+        const leftSide = x < window.innerWidth * 0.45;
+        if (leftSide && !this.touchMove) this.touchMove = { id, ox: x, oy: y, x, y };
+        else if (!leftSide && !this.touchAim) this.touchAim = { id, ox: x, oy: y, x, y, t: performance.now(), dragging: false };
+      }
+      this.updateStickUI();
+    }
+    tMove(e) {
+      if (!this.touchMove && !this.touchAim) return;
+      e.preventDefault();
+      for (const t of Array.from(e.changedTouches)) {
+        const tm = this.touchMove, ta = this.touchAim;
+        if (tm && tm.id === t.identifier) {
+          tm.x = t.clientX; tm.y = t.clientY;
+          // 指が遠くへ行ったらスティックの中心もついてくる
+          const R = this.stickR(), dx = tm.x - tm.ox, dy = tm.y - tm.oy, d = Math.hypot(dx, dy);
+          if (d > R * 1.6) { tm.ox = tm.x - dx / d * R * 1.6; tm.oy = tm.y - dy / d * R * 1.6; }
+        }
+        if (ta && ta.id === t.identifier) {
+          ta.x = t.clientX; ta.y = t.clientY;
+          if (!ta.dragging && Math.hypot(ta.x - ta.ox, ta.y - ta.oy) > 14) ta.dragging = true;
+        }
+      }
+      this.updateStickUI();
+    }
+    tEnd(e, cancel) {
+      for (const t of Array.from(e.changedTouches)) {
+        const tm = this.touchMove, ta = this.touchAim;
+        if (tm && tm.id === t.identifier) this.touchMove = null;
+        if (ta && ta.id === t.identifier) {
+          // ドラッグして離したら発射。ちょんと触っただけでも、今の向きに発射
+          if (this.enabled && !cancel) this.pending[0].fire = true;
+          this.touchAim = null;
+        }
+      }
+      this.prune(e, cancel);
       this.updateStickUI();
     }
     move(e) {
@@ -102,30 +151,9 @@
         if (this.onHover) this.onHover(e.clientX, e.clientY);
         return;
       }
-      const tm = this.touchMove, ta = this.touchAim;
-      if (tm && tm.id === e.pointerId) {
-        tm.x = e.clientX; tm.y = e.clientY;
-        // 指が遠くへ行ったらスティックの中心もついてくる
-        const R = this.stickR(), dx = tm.x - tm.ox, dy = tm.y - tm.oy, d = Math.hypot(dx, dy);
-        if (d > R * 1.6) { tm.ox = tm.x - dx / d * R * 1.6; tm.oy = tm.y - dy / d * R * 1.6; }
-        this.updateStickUI();
-      }
-      if (ta && ta.id === e.pointerId) {
-        ta.x = e.clientX; ta.y = e.clientY;
-        if (!ta.dragging && Math.hypot(ta.x - ta.ox, ta.y - ta.oy) > 14) ta.dragging = true;
-        this.updateStickUI();
-      }
     }
     up(e, cancel) {
-      if (e.pointerType === 'mouse') { if (e.button === 0) this.mouseDown = false; return; }
-      const tm = this.touchMove, ta = this.touchAim;
-      if (tm && tm.id === e.pointerId) this.touchMove = null;
-      if (ta && ta.id === e.pointerId) {
-        // ドラッグして離したら発射。ちょんと触っただけでも、今の向きに発射
-        if (this.enabled && !cancel) this.pending[0].fire = true;
-        this.touchAim = null;
-      }
-      this.updateStickUI();
+      if (e.pointerType === 'mouse' && e.button === 0) this.mouseDown = false;
     }
     stickR() { return Math.max(44, Math.min(70, window.innerHeight * 0.13)); }
     updateStickUI() {
