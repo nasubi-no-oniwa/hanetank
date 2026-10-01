@@ -1,0 +1,154 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "rooms": {
+      "$code": {
+        ".read": "$code.length <= 20",
+        ".write": "$code.length <= 20",
+        "players": {
+          "$slot": {
+            ".validate": "($slot === '0' || $slot === '1') && newData.hasChildren(['id', 'name']) && newData.child('name').isString() && newData.child('name').val().length <= 8"
+          }
+        },
+        "watchers": {
+          "$id": {
+            ".validate": "$id.length <= 24 && newData.child('name').isString() && newData.child('name').val().length <= 8"
+          }
+        },
+        "ready": {
+          "$slot": {
+            ".validate": "($slot === '0' || $slot === '1') && newData.isNumber()"
+          }
+        },
+        "game": {
+          ".validate": "newData.hasChildren(['round', 'seed', 'startAt'])"
+        },
+        "boards": {
+          "$slot": {
+            ".validate": "($slot === '0' || $slot === '1') && newData.child('c').isString() && newData.child('c').val().length <= 100"
+          }
+        },
+        "ev": {
+          "$round": {
+            "$slot": {
+              "$id": {
+                ".validate": "newData.child('t').isString()"
+              }
+            }
+          }
+        },
+        "result": {
+          "$round": {
+            ".validate": "newData.hasChildren(['loser'])"
+          }
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
+    },
+    "daruma": {
+      "$code": {
+        ".read": "$code.length <= 20",
+        ".write": "$code.length <= 20",
+        "players": {
+          "$slot": {
+            ".validate": "($slot === '0' || $slot === '1') && newData.hasChildren(['id', 'name']) && newData.child('name').isString() && newData.child('name').val().length <= 8"
+          }
+        },
+        "watchers": {
+          "$id": {
+            ".validate": "$id.length <= 24 && newData.child('name').isString() && newData.child('name').val().length <= 8"
+          }
+        },
+        "ready": {
+          "$slot": {
+            ".validate": "($slot === '0' || $slot === '1') && newData.isNumber()"
+          }
+        },
+        "game": {
+          ".validate": "newData.hasChildren(['round', 'seed', 'startAt'])"
+        },
+        "mv": {
+          "$round": {
+            "$id": {
+              ".validate": "newData.hasChildren(['c', 's', 'i']) && newData.child('c').isNumber() && newData.child('c').val() >= 0 && newData.child('c').val() <= 6"
+            }
+          }
+        },
+        "result": {
+          "$round": {
+            ".validate": "newData.hasChildren(['loser'])"
+          }
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
+    },
+    "hanetank": {
+      "$code": {
+        ".read": "$code.length <= 20",
+        ".write": "$code.length <= 20",
+        "players": {
+          "$slot": {
+            ".validate": "($slot === '0' || $slot === '1') && newData.hasChildren(['id', 'name']) && newData.child('name').isString() && newData.child('name').val().length <= 8"
+          }
+        },
+        "watchers": {
+          "$id": {
+            ".validate": "$id.length <= 24 && newData.child('name').isString() && newData.child('name').val().length <= 8"
+          }
+        },
+        "game": {
+          ".validate": "newData.hasChildren(['ph'])"
+        },
+        "pick": {
+          "$slot": {
+            ".validate": "$slot === '0' || $slot === '1'"
+          }
+        },
+        "rd": {
+          "$slot": {
+            ".validate": "($slot === '0' || $slot === '1') && newData.isString() && newData.val().length <= 40"
+          }
+        },
+        "st": {
+          "$slot": {
+            ".validate": "$slot === '0' || $slot === '1'"
+          }
+        },
+        "ev": {
+          "$key": {
+            "$slot": {
+              "$id": {
+                ".validate": "($slot === '0' || $slot === '1') && newData.hasChildren(['t'])"
+              }
+            }
+          }
+        },
+        "sig": {
+          "$slot": {
+            "$id": {
+              ".validate": "($slot === '0' || $slot === '1') && newData.hasChildren(['f', 'to', 'y', 'd']) && newData.child('d').isString() && newData.child('d').val().length <= 8000"
+            }
+          }
+        },
+        "gone": {
+          "$slot": {
+            ".validate": "($slot === '0' || $slot === '1') && newData.isString() && newData.val().length <= 24"
+          }
+        },
+        "sp": {
+          "$slot": {
+            ".validate": "($slot === '0' || $slot === '1') && newData.hasChildren(['k', 'n', 't'])"
+          }
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
+    }
+  }
+}
