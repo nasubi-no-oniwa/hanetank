@@ -76,6 +76,8 @@
       [...el.children].forEach((p, i) => p.classList.toggle('on', i < wins[s]));
     }
   }
+  let flipped = false;
+  function setFlip(f) { flipped = !!f; R.setFlip(flipped); input.flip = flipped; document.body.classList.toggle('flip', flipped); }
   function setNames(a, b) { $('hud-name0').textContent = a; $('hud-name1').textContent = b; }
 
   // ---------- 自分の性能・地雷の残り（画面の上） ----------
@@ -108,7 +110,7 @@
     for (const b of bubbles) {
       const t = sim && sim.tanks[b.slot];
       // 戦いの外（スキル・ブロックの時間）は、その人の側の上に出す
-      const pos = t ? R.worldToScreen(t.x, t.y, 1.3) : { x: innerWidth * (b.slot === 0 ? 0.2 : 0.8), y: Math.max(90, innerHeight * 0.2) };
+      const pos = t ? R.worldToScreen(t.x, t.y, 1.3) : { x: innerWidth * ((b.slot === 0) !== flipped ? 0.2 : 0.8), y: Math.max(90, innerHeight * 0.2) };
       b.el.style.left = pos.x + 'px'; b.el.style.top = pos.y + 'px';
     }
   }
@@ -1027,6 +1029,8 @@
     looksNow() {
       const p = this.room.players;
       const l = [p[0] ? parseLook(p[0].look) : { c: 0, p: 0 }, p[1] ? parseLook(p[1].look) : { c: 1, p: 0 }];
+      // 自分の色は、自分でえらんだ色のまま。かぶったら相手の色を変えて見せる
+      if (this.me === 1) { const r = pairLooks(l[1], l[0]); return [r[1], r[0]]; }
       return pairLooks(l[0], l[1]);
     }
     onPeople(p) {
@@ -1358,7 +1362,7 @@
   //  全体の流れ
   // =============================================
   let game = null;
-  function setGame(g) { if (game && game.destroy) game.destroy(); game = g; document.body.classList.remove('live'); document.body.classList.toggle('in-game', !(g instanceof Demo) && !(g instanceof Showcase)); }
+  function setGame(g) { if (game && game.destroy) game.destroy(); game = g; setFlip(g instanceof OnlineMatch && g.me === 1); document.body.classList.remove('live'); document.body.classList.toggle('in-game', !(g instanceof Demo) && !(g instanceof Showcase)); }
   function goTitle() {
     hud(false); input.reset(); input.enabled = false; hideBanner(); $('count').textContent = '';
     document.body.classList.remove('can-stamp');

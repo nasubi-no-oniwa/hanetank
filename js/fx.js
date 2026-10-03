@@ -257,6 +257,7 @@
       this.smoke.mat.uniforms.scale.value = this.add.mat.uniforms.scale.value;
       this.fitCamera();
     }
+    setFlip(f) { f = !!f; if (this.flip === f) return; this.flip = f; this.fitCamera(); }
     fitCamera() {
       // 元のゲームと同じく、少し斜め上から見下ろす。ステージ全体が入る距離に調整
       const cam = this.camera, tilt = 0.95; // 地面からの角度（ラジアン）
@@ -264,8 +265,10 @@
       const vfov = cam.fov * Math.PI / 180, hfov = 2 * Math.atan(Math.tan(vfov / 2) * cam.aspect);
       const needW = W + 0.6, needH = H * Math.sin(tilt) + 1.4 + 1.2;
       const d = Math.max((needW / 2) / Math.tan(hfov / 2), (needH / 2) / Math.tan(vfov / 2));
-      this.camBase = new V3(W / 2, Math.sin(tilt) * d, H / 2 + Math.cos(tilt) * d + 0.3);
-      this.camLook = new V3(W / 2, 0, H / 2 + 0.3);
+      // flip：右がわスタートの人は、反対がわから見る（自分がいつも左に見える）
+      const sg = this.flip ? -1 : 1;
+      this.camBase = new V3(W / 2, Math.sin(tilt) * d, H / 2 + sg * (Math.cos(tilt) * d + 0.3));
+      this.camLook = new V3(W / 2, 0, H / 2 + sg * 0.3);
       cam.position.copy(this.camBase); cam.lookAt(this.camLook);
     }
 

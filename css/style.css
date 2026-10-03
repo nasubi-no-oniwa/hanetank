@@ -341,3 +341,12 @@ body.can-stamp.in-game #place { padding-right: calc(64px + var(--safe-r)); }
 .cu-tabs button { flex: 1; border: 3px solid var(--ink); border-radius: 10px; background: var(--paper); padding: 5px; font-size: 13px; }
 .cu-tabs button.sel { background: var(--ink); color: #fff; }
 #cu-note2:empty { display: none; }
+
+/* 右がわスタートの人：自分がいつも左に見えるように、上の表示も左右を入れかえる */
+body.flip .hud-top { flex-direction: row-reverse; }
+body.flip .hud-p { flex-direction: row-reverse; }
+body.flip .hud-p.p0 { justify-content: flex-start; }
+body.flip .hud-p.p1 { justify-content: flex-end; }
+body.flip .hud-p.p0 .hud-name { border-left: 0; border-right: 10px solid var(--c0, var(--blue)); }
+body.flip .hud-p.p1 .hud-name { border-right: 0; border-left: 10px solid var(--c1, var(--red)); }
+body.flip .hud-info-row { flex-direction: row-reverse; }

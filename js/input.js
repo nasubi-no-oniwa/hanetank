@@ -216,7 +216,7 @@
       const pad = this.padState(i);
       if (pad) {
         if (pad.mx || pad.my) { out.mx = pad.mx; out.my = pad.my; }
-        if (Math.hypot(pad.ax, pad.ay) > 0.45) { this.aim[i] = Math.atan2(pad.ay, pad.ax); if (i === 0 && this.mode !== 'local2') this.lastDevice = 'pad'; }
+        if (Math.hypot(pad.ax, pad.ay) > 0.45) { this.aim[i] = this.flip ? Math.atan2(-pad.ay, -pad.ax) : Math.atan2(pad.ay, pad.ax); if (i === 0 && this.mode !== 'local2') this.lastDevice = 'pad'; }
         if (pad.fireEdge) out.fire = true;
         if (pad.mineEdge) out.mine = true;
       }
@@ -246,6 +246,8 @@
         if (this.lastDevice === 'pad' || this.lastDevice === 'keys') out.guide = true;
       } else if (this.mode === 'local2') out.guide = true;
 
+      // 反対がわから見ているときは、画面の向きに合わせて移動を逆にする
+      if (this.flip) { out.mx = -out.mx; out.my = -out.my; }
       out.aim = this.aim[i];
       const p = this.pending[i];
       if (p.fire) { out.fire = true; p.fire = false; }
