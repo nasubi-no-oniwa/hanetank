@@ -91,6 +91,55 @@
 
   const hexToRgb = h => { const c = new THREE.Color(h); return [c.r, c.g, c.b]; };
 
+  // ---------- 戦車の3Dモデル（js/models.js） ----------
+  const b64 = (s, T) => { const bin = atob(s), u = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); return new T(u.buffer); };
+  const MODEL = {};
+  function modelGeo(key) {
+    if (MODEL[key]) return MODEL[key];
+    const m = HT.MODELS[key], g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.BufferAttribute(b64(m.p, Float32Array), 3));
+    g.setAttribute('normal', new THREE.BufferAttribute(b64(m.n, Float32Array), 3));
+    g.setAttribute('uv', new THREE.BufferAttribute(b64(m.uv, Float32Array), 2));
+    g.setIndex(new THREE.BufferAttribute(b64(m.i, m.i32 ? Uint32Array : Uint16Array), 1));
+    g.computeBoundingBox(); g.computeBoundingSphere();
+    return MODEL[key] = g;
+  }
+  // 色見本の画像（256×256）。読みこみが終わったら、待っている戦車の色を塗る
+  const palImg = new Image(); let palReady = false; const palWait = [];
+  palImg.onload = () => { palReady = true; palWait.splice(0).forEach(f => f()); };
+  palImg.src = HT.MODEL_PALETTE;
+  // 色見本の一部（ライム色＝車体、赤＝弾の先）を、プレイヤーの色に塗りかえた絵を作る
+  function recolor(g, x, y, w, h, rgb) {
+    const id = g.getImageData(x, y, w, h), d = id.data, lum = (r, gg, b) => 0.3 * r + 0.59 * gg + 0.11 * b, l0 = lum(d[0], d[1], d[2]) || 1, cl = lum(rgb[0], rgb[1], rgb[2]) || 1;
+    for (let i = 0; i < d.length; i += 4) {
+      const k = lum(d[i], d[i + 1], d[i + 2]) / l0;
+      // 明るさの比はそのまま、色だけ入れかえる。暗い色でも影が出るように少し持ち上げる
+      const f = k * Math.max(0.85, Math.min(1.6, 150 / cl));
+      d[i] = Math.min(255, rgb[0] * f); d[i + 1] = Math.min(255, rgb[1] * f); d[i + 2] = Math.min(255, rgb[2] * f);
+    }
+    g.putImageData(id, x, y);
+  }
+  function tankTexture(color) {
+    const c = document.createElement('canvas'); c.width = c.height = 256;
+    const t = new THREE.CanvasTexture(c); t.flipY = false; if ('colorSpace' in t) t.colorSpace = THREE.SRGBColorSpace;
+    // 色見本は明るいパステル調なので、プレイヤーの色も少し白に寄せてから塗る
+    const col = new THREE.Color(color).lerp(new THREE.Color(0xffffff), 0.22), rgb = [col.r * 255, col.g * 255, col.b * 255];
+    const paint = () => { const g = c.getContext('2d'); g.drawImage(palImg, 0, 0, 256, 256); recolor(g, 64, 0, 32, 64, rgb); recolor(g, 128, 0, 32, 64, rgb.map(v => v * 0.75 + 64)); t.needsUpdate = true; };
+    palReady ? paint() : palWait.push(paint);
+    return t;
+  }
+  // 角の丸いおもちゃのブロック（高さ1、まん中が0）
+  const BLOCK = {};
+  function blockGeo(r = 0.13) {
+    if (BLOCK[r]) return BLOCK[r];
+    const s = 0.49 - 0.05, sh = new THREE.Shape();
+    sh.moveTo(-s + r, -s); sh.lineTo(s - r, -s); sh.quadraticCurveTo(s, -s, s, -s + r); sh.lineTo(s, s - r); sh.quadraticCurveTo(s, s, s - r, s);
+    sh.lineTo(-s + r, s); sh.quadraticCurveTo(-s, s, -s, s - r); sh.lineTo(-s, -s + r); sh.quadraticCurveTo(-s, -s, -s + r, -s);
+    const g = new THREE.ExtrudeGeometry(sh, { depth: 1 - 0.1, bevelEnabled: true, bevelThickness: 0.05, bevelSize: 0.05, bevelSegments: 3, curveSegments: 5 });
+    g.rotateX(-Math.PI / 2); g.translate(0, -0.45, 0); g.computeVertexNormals();
+    return BLOCK[r] = g;
+  }
+
   class Renderer {
     constructor(canvas, qualityName) {
       this.canvas = canvas;
@@ -187,11 +236,12 @@
         g.strokeStyle = 'rgba(255,255,255,.5)'; g.lineWidth = 3; g.strokeRect(2, 2, w - 4, h - 4);
       });
       this.mat = {
-        hardTop: new THREE.MeshStandardMaterial({ map: woodTop, roughness: 0.8 }),
-        hardSide: new THREE.MeshStandardMaterial({ color: 0xb87d45, roughness: 0.85 }),
-        softTop: new THREE.MeshStandardMaterial({ map: cork, roughness: 0.9 }),
-        softSide: new THREE.MeshStandardMaterial({ color: 0xe8879f, roughness: 0.9 }),
-        border: new THREE.MeshStandardMaterial({ color: 0x9c6a3c, roughness: 0.85 }),
+        hardTop: new THREE.MeshStandardMaterial({ map: woodTop, roughness: 0.6 }),
+        hardSide: new THREE.MeshStandardMaterial({ color: 0xd99a5b, roughness: 0.6 }),
+        softTop: new THREE.MeshStandardMaterial({ map: cork, roughness: 0.75 }),
+        softSide: new THREE.MeshStandardMaterial({ color: 0xf29ab3, roughness: 0.75 }),
+        border: new THREE.MeshStandardMaterial({ color: 0x8f5f3a, roughness: 0.7 }),
+        borderTop: new THREE.MeshStandardMaterial({ color: 0xb07a4c, roughness: 0.7 }),
         close: new THREE.MeshStandardMaterial({ color: 0xc8402a, emissive: 0xff3b1a, emissiveIntensity: 0.28, roughness: 0.6 }),
         hole: new THREE.MeshBasicMaterial({ map: canvasTex(64, 64, (g, w, h) => { const gr = g.createRadialGradient(32, 32, 4, 32, 32, 34); gr.addColorStop(0, '#05070c'); gr.addColorStop(0.7, '#0d1220'); gr.addColorStop(0.9, '#56607a'); gr.addColorStop(1, '#8a96b4'); g.fillStyle = gr; g.fillRect(0, 0, w, h); }) }),
         warn: new THREE.MeshBasicMaterial({ color: 0xff3b1a, transparent: true, opacity: 0.4, depthWrite: false }),
@@ -285,11 +335,12 @@
         m.rotation.x = -Math.PI / 2; m.position.set(x + 0.5, 0.008, y + 0.5); m.scale.set(0.98, 0.98, 1); return m;
       }
       const border = x === 0 || y === 0 || x === W - 1 || y === H - 1;
-      const top = k === T.SOFT ? this.mat.softTop : k === T.CLOSE ? this.mat.close : border ? this.mat.border : this.mat.hardTop;
+      const top = k === T.SOFT ? this.mat.softTop : k === T.CLOSE ? this.mat.close : border ? this.mat.borderTop : this.mat.hardTop;
       const side = k === T.SOFT ? this.mat.softSide : k === T.CLOSE ? this.mat.close : border ? this.mat.border : this.mat.hardSide;
       const hgt = k === T.SOFT ? 0.82 : border ? 0.7 : 0.9;
-      const m = new THREE.Mesh(this.geo.box, [side, side, top, side, side, side]);
-      m.scale.set(0.98, hgt, 0.98); m.position.set(x + 0.5, hgt / 2, y + 0.5);
+      // 角の丸いブロック（ふた＝上下の面、側面）。やわらかいブロックはもっと丸く
+      const m = new THREE.Mesh(blockGeo(k === T.SOFT ? 0.22 : border ? 0.08 : 0.13), [top, side]);
+      m.scale.set(1, hgt, 1); m.position.set(x + 0.5, hgt / 2, y + 0.5);
       m.castShadow = this.q.shadows; m.receiveShadow = true;
       m.userData.h = hgt;
       return m;
@@ -323,40 +374,43 @@
     makeTank(slot, radius, look) {
       const g = new THREE.Group();
       const r = radius, color = new THREE.Color(look.color);
-      const dark = color.clone().multiplyScalar(0.55);
-      const bodyTex = canvasTex(128, 128, (c, w, h) => {
-        c.fillStyle = look.color; c.fillRect(0, 0, w, h);
-        c.fillStyle = 'rgba(255,255,255,.85)';
-        if (look.pattern === 'stripe') { for (let i = -2; i < 6; i++) { c.save(); c.translate(i * 32, 0); c.rotate(0.6); c.fillRect(0, -20, 12, 220); c.restore(); } }
-        else if (look.pattern === 'dot') { for (let i = 0; i < 9; i++) { c.beginPath(); c.arc(20 + (i % 3) * 44, 20 + Math.floor(i / 3) * 44, 9, 0, 7); c.fill(); } }
-        else if (look.pattern === 'star') { c.translate(64, 64); c.beginPath(); for (let i = 0; i < 10; i++) { const a = -Math.PI / 2 + i * Math.PI / 5, rr = i % 2 ? 18 : 42; c[i ? 'lineTo' : 'moveTo'](Math.cos(a) * rr, Math.sin(a) * rr); } c.closePath(); c.fill(); }
-        else if (look.pattern === 'zigzag') { c.lineWidth = 10; c.strokeStyle = 'rgba(255,255,255,.85)'; c.beginPath(); for (let i = 0; i <= 8; i++) c.lineTo(i * 16, i % 2 ? 48 : 80); c.stroke(); }
-        c.strokeStyle = 'rgba(0,0,0,.18)'; c.lineWidth = 6; c.strokeRect(3, 3, w - 6, h - 6);
-      });
-      const bodyMat = new THREE.MeshStandardMaterial({ color: 0xffffff, map: bodyTex, roughness: 0.5, metalness: 0.05 });
-      const sideMat = new THREE.MeshStandardMaterial({ color, roughness: 0.55 });
-      const treadMat = new THREE.MeshStandardMaterial({ color: 0x3a3430, roughness: 0.9 });
-      const body = new THREE.Mesh(this.geo.box, [sideMat, sideMat, bodyMat, sideMat, sideMat, sideMat]);
-      body.scale.set(r * 1.9, r * 0.62, r * 1.5); body.position.y = r * 0.55;
-      const tl = new THREE.Mesh(this.geo.box, treadMat); tl.scale.set(r * 2.05, r * 0.5, r * 0.42); tl.position.set(0, r * 0.28, r * 0.78);
-      const tr = tl.clone(); tr.position.z = -r * 0.78;
-      // 砲台：1Pは丸、2Pは六角（色が見分けにくくても形でわかる）
-      const turretGeo = new THREE.CylinderGeometry(r * 0.55, r * 0.62, r * 0.42, slot === 1 ? 6 : 24);
-      const turretMat = new THREE.MeshStandardMaterial({ color: color.clone().lerp(new THREE.Color(0xffffff), 0.25), roughness: 0.45 });
-      const turret = new THREE.Group();
-      const tmesh = new THREE.Mesh(turretGeo, turretMat); tmesh.position.y = 0;
-      const barrel = new THREE.Mesh(new THREE.CylinderGeometry(r * 0.15, r * 0.17, r * 1.35, 12), new THREE.MeshStandardMaterial({ color: dark, roughness: 0.4 }));
-      barrel.rotation.z = -Math.PI / 2; barrel.position.x = r * 0.75;
-      const tip = new THREE.Mesh(new THREE.CylinderGeometry(r * 0.2, r * 0.2, r * 0.18, 12), new THREE.MeshStandardMaterial({ color: dark }));
-      tip.rotation.z = -Math.PI / 2; tip.position.x = r * 1.4;
-      turret.add(tmesh, barrel, tip);
-      turret.position.y = r * 1.05;
+      // おもちゃの戦車モデル。前が +z なので、90°まわして +x を前にする
+      const k = r * 2.25 / 0.54, tex = tankTexture(look.color);
+      const mat = new THREE.MeshStandardMaterial({ map: tex, roughness: 0.5, metalness: 0.04 });
+      const body = new THREE.Mesh(modelGeo('base'), mat); body.scale.setScalar(k); body.rotation.y = Math.PI / 2;
+      const hull = new THREE.Group(); hull.add(body);
+      // 模様は、車体の上にシールのように貼る
+      if (look.pattern && look.pattern !== 'none') {
+        const pt = canvasTex(128, 128, (c, w, h) => {
+          c.fillStyle = 'rgba(255,255,255,.9)'; c.strokeStyle = 'rgba(255,255,255,.9)';
+          if (look.pattern === 'stripe') { for (let i = -2; i < 6; i++) { c.save(); c.translate(i * 32, 0); c.rotate(0.6); c.fillRect(0, -20, 12, 220); c.restore(); } }
+          else if (look.pattern === 'dot') { for (let i = 0; i < 9; i++) { c.beginPath(); c.arc(20 + (i % 3) * 44, 20 + Math.floor(i / 3) * 44, 10, 0, 7); c.fill(); } }
+          else if (look.pattern === 'star') { c.translate(64, 64); c.beginPath(); for (let i = 0; i < 10; i++) { const a = -Math.PI / 2 + i * Math.PI / 5, rr = i % 2 ? 20 : 48; c[i ? 'lineTo' : 'moveTo'](Math.cos(a) * rr, Math.sin(a) * rr); } c.closePath(); c.fill(); }
+          else if (look.pattern === 'zigzag') { c.lineWidth = 12; c.beginPath(); for (let i = 0; i <= 8; i++) c.lineTo(i * 16, i % 2 ? 44 : 84); c.stroke(); }
+        });
+        const dec = new THREE.Mesh(this.geo.plane, new THREE.MeshStandardMaterial({ map: pt, transparent: true, depthWrite: false, roughness: 0.5, polygonOffset: true, polygonOffsetFactor: -4 }));
+        dec.rotation.x = -Math.PI / 2; dec.position.set(-0.06 * k, 0.19 * k, 0); dec.scale.set(0.3 * k, 0.26 * k, 1); dec.renderOrder = 2;
+        hull.add(dec);
+      }
+      // 砲塔：反動で少し下がる部分（recoil）を中に入れる
+      const tm = new THREE.Mesh(modelGeo('barrel'), mat); tm.scale.setScalar(k); tm.rotation.y = Math.PI / 2;
+      const recoil = new THREE.Group(); recoil.add(tm);
+      const turret = new THREE.Group(); turret.add(recoil);
+      // 2Pはアンテナつき（色が見分けにくくても形でわかる）
+      if (slot === 1) {
+        const ant = new THREE.Mesh(new THREE.CylinderGeometry(0.012 * k, 0.012 * k, 0.22 * k, 6), new THREE.MeshStandardMaterial({ color: 0x55606e, roughness: 0.5 }));
+        ant.position.set(-0.08 * k, 0.4 * k, 0.08 * k);
+        const ball = new THREE.Mesh(new THREE.SphereGeometry(0.03 * k, 10, 8), new THREE.MeshStandardMaterial({ color, roughness: 0.4, emissive: color, emissiveIntensity: 0.25 }));
+        ball.position.set(-0.08 * k, 0.51 * k, 0.08 * k);
+        recoil.add(ant, ball);
+      }
       // 足元の光る輪（自分の色）
       const ring = new THREE.Mesh(this.geo.ring, new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.55, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide }));
       ring.rotation.x = -Math.PI / 2; ring.position.y = 0.015; ring.scale.setScalar(r * 1.55); ring.renderOrder = 1;
-      const hull = new THREE.Group(); hull.add(body, tl, tr);
       g.add(hull, turret, ring);
-      for (const m of [body, tl, tr, tmesh, barrel, tip]) { m.castShadow = this.q.shadows; m.receiveShadow = true; }
+      g.traverse(m => { if (m.isMesh && m !== ring) { m.castShadow = this.q.shadows; m.receiveShadow = true; } });
+      // 弾も同じ色で（先が自分の色になる）
+      const bulletMat = new THREE.MeshStandardMaterial({ map: tex, roughness: 0.35, emissive: 0xffffff, emissiveMap: tex, emissiveIntensity: 0.55 });
       // 残りの弾（足元の点）
       const ammo = new THREE.Group(); ammo.visible = false;
       const n = HT.CONFIG.MAX_BULLETS;
@@ -366,7 +420,7 @@
         ammo.add(d);
       }
       g.add(ammo);
-      g.userData = { hull, turret, ring, r, rgb: hexToRgb(look.color), lastX: 0, lastY: 0, trackAcc: 0, recoil: 0, ammo, ammoLeft: -1 };
+      g.userData = { hull, turret, recoilObj: recoil, ring, r, rgb: hexToRgb(look.color), lastX: 0, lastY: 0, trackAcc: 0, recoil: 0, ammo, ammoLeft: -1, bulletMat, tex };
       return g;
     }
     // 使い終わった3Dの部品をメモリから片づける（共有の形や材質は残す）
@@ -374,7 +428,7 @@
       const shared = new Set(Object.values(this.geo));
       const sharedMat = new Set(Object.values(this.mat));
       obj.traverse(o => {
-        if (o.geometry && !shared.has(o.geometry)) o.geometry.dispose();
+        if (o.geometry && !shared.has(o.geometry) && !Object.values(MODEL).includes(o.geometry) && !Object.values(BLOCK).includes(o.geometry)) o.geometry.dispose();
         const mats = Array.isArray(o.material) ? o.material : o.material ? [o.material] : [];
         for (const m of mats) {
           if (sharedMat.has(m)) continue;
@@ -384,7 +438,7 @@
       });
     }
     setTanks(list) {
-      for (const o of this.tankObjs) if (o) { this.scene.remove(o); this.dispose(o); }
+      for (const o of this.tankObjs) if (o) { this.scene.remove(o); this.dispose(o); if (o.userData.bulletMat) o.userData.bulletMat.dispose(); }
       this.tankObjs = [];
       for (const t of list) {
         if (!t) continue;
@@ -409,7 +463,7 @@
         u.hull.rotation.y = -t.a;
         u.turret.rotation.y = -t.aim;
         u.recoil = Math.max(0, u.recoil - dt * 6);
-        u.turret.children[1].position.x = u.r * (0.75 - u.recoil * 0.25);
+        u.recoilObj.position.x = -u.r * u.recoil * 0.22;
         u.ring.material.opacity = 0.35 + 0.2 * Math.sin(this.time * 4 + t.slot);
         // キャタピラ跡
         const moved = Math.hypot(t.x - u.lastX, t.y - u.lastY);
@@ -424,6 +478,7 @@
         let o = this.bulletObjs.get(b.id);
         if (!o) o = this.makeBullet(b);
         o.core.position.set(b.x, 0.38, b.y);
+        if (o.core.userData.model) { o.core.position.y = 0.38 - b.r * 1.2; o.core.rotation.y = Math.atan2(b.vx, b.vy); }
         o.glow.position.set(b.x, 0.38, b.y);
         const pulse = 1 + 0.12 * Math.sin(this.time * 30 + o.seed);
         o.glow.scale.setScalar(b.r * 9 * pulse);
@@ -460,7 +515,7 @@
       }
       this.updateEffects(dt);
     }
-    removeBullet(o) { this.scene.remove(o.core); this.scene.remove(o.glow); o.core.material.dispose(); o.glow.material.dispose(); }
+    removeBullet(o) { this.scene.remove(o.core); this.scene.remove(o.glow); if (!o.core.userData.model) o.core.material.dispose(); o.glow.material.dispose(); }
     removeMine(o) { this.scene.remove(o.g); this.scene.remove(o.glow); this.dispose(o.g); o.glow.material.dispose(); }
     setAmmo(slot, left, show) {
       const g = this.tankObjs[slot]; if (!g) return;
@@ -477,8 +532,9 @@
     makeBullet(b) {
       const owner = this.tankObjs[b.owner];
       const rgb = owner ? owner.userData.rgb.map(v => Math.min(1, v * 0.6 + 0.45)) : [1, 0.9, 0.6];
-      const core = new THREE.Mesh(this.geo.sphere, new THREE.MeshBasicMaterial({ color: 0xffffff }));
-      core.scale.setScalar(b.r);
+      // おもちゃの弾（前が +z）。持ち主の色。なければ白い球
+      const core = owner ? new THREE.Mesh(modelGeo('bullet'), owner.userData.bulletMat) : new THREE.Mesh(this.geo.sphere, new THREE.MeshBasicMaterial({ color: 0xffffff }));
+      core.scale.setScalar(owner ? b.r * 2.4 / 0.09 : b.r); core.userData.model = !!owner;
       const glow = new THREE.Sprite(this.mat.glow.clone());
       glow.material.color.setRGB(rgb[0], rgb[1], rgb[2]);
       glow.renderOrder = 5;
