@@ -608,6 +608,7 @@
       if (o.next) { nx.textContent = o.next.text; nx.onclick = () => o.next.fn(nx); }
       const rp = $('res-replay'); rp.classList.toggle('hidden', !o.replay); rp.onclick = () => o.replay && o.replay();
       const tt = $('res-title-btn'); tt.classList.toggle('hidden', !o.toTitle); tt.onclick = () => o.toTitle && o.toTitle();
+      QM.syncNext(!!o.toTitle);
       show('result');
     }
   };
@@ -1035,6 +1036,7 @@
     }
     onPeople(p) {
       const both = p.players[0] && p.players[1];
+      if (both || this.watch) QM.started({ code: this.room.code, watch: this.watch });
       if (this.phase === 'wait' || this.phase === 'lobby') {
         if (!both) {
           $('wait-code').textContent = this.room.code;
@@ -1329,7 +1331,7 @@
       this.phase = 'left'; this.b && !this.b.result && (this.b.result = { winner: this.me });
       const op = this.room.players[this.oppSlot()];
       HT.Sound.win();
-      ResultUI.show({ title: 'あなたの勝ち！', cls: 'win', wins: null, cards: [], record: '', note: '相手がいなくなったので、あなたの勝ちです。このまま待つと、同じあいことばで入ってきた人と対戦できます。', next: null, replay: null, toTitle: () => goTitle() });
+      ResultUI.show({ title: 'あなたの勝ち！', cls: 'win', wins: null, cards: [], record: '', note: QM.isRandom() ? '相手が抜けたので、あなたの勝ちです。' : '相手がいなくなったので、あなたの勝ちです。このまま待つと、同じあいことばで入ってきた人と対戦できます。', next: null, replay: null, toTitle: () => goTitle() });
       if (this.me === 0) this.room.setGame({ ph: 'lobby', m: ((this.g && this.g.m) || 0) + 1 });
     }
     kicked() {
@@ -1364,6 +1366,7 @@
   let game = null;
   function setGame(g) { if (game && game.destroy) game.destroy(); game = g; setFlip(g instanceof OnlineMatch && g.me === 1); document.body.classList.remove('live'); document.body.classList.toggle('in-game', !(g instanceof Demo) && !(g instanceof Showcase)); }
   function goTitle() {
+    QM.ended();
     hud(false); input.reset(); input.enabled = false; hideBanner(); $('count').textContent = '';
     document.body.classList.remove('can-stamp');
     setGame(new Demo());
@@ -1411,6 +1414,22 @@
     } finally { $('btn-join').disabled = $('btn-watch').disabled = false; }
   }
   $('btn-join').onclick = () => joinOnline(false);
+
+  // ---------- だれかと対戦（ランダム対戦） ----------
+  QM.setup({
+    game: 'hanetank', ver: 'v1', name: 'ハネタンク',
+    getDb: getDB, anchor: '#btn-online', anchorWhere: 'before', btnClass: 'btn wide indigo', nextClass: 'btn ghost', nameKey: 'ht_qm_name',
+    join: (code, name) => {
+      // いつものあいことば・なまえは上書きしない
+      const keepC = store.get('code', ''), keepN = store.get('name', '');
+      $('in-name').value = name; $('in-code').value = code; joinOnline(false);
+      setTimeout(() => { store.set('code', keepC); store.set('name', keepN || name); }, 60);
+    },
+    cpu: () => startLocal('cpu', 'normal'), cpuLabel: 'CPU（ふつう）と遊びながら待つ',
+    quit: () => goTitle(),
+    colors: { main: '#e2553f', alt: '#4f5bd5', bg: 'var(--cream)', fg: 'var(--ink)' },
+  });
+  QM.resultSlot('#result .row', '#res-title-btn');
   $('btn-watch').onclick = () => joinOnline(true);
   $('btn-wait-leave').onclick = () => goTitle();
   // 招待リンク：押すだけで同じ部屋に入れるURLを送る

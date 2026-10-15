@@ -149,6 +149,678 @@
           ".validate": false
         }
       }
+    },
+    "panfa": {
+      "$code": {
+        ".read": "$code.length <= 20",
+        ".write": "$code.length <= 20",
+        "players": {
+          "$slot": {
+            ".validate": "($slot === '0' || $slot === '1') && newData.hasChildren(['id', 'name']) && newData.child('name').isString() && newData.child('name').val().length <= 8"
+          }
+        },
+        "watchers": {
+          "$id": {
+            ".validate": "$id.length <= 24 && newData.child('name').isString() && newData.child('name').val().length <= 8"
+          }
+        },
+        "ready": {
+          "$slot": {
+            ".validate": "($slot === '0' || $slot === '1') && newData.isNumber()"
+          }
+        },
+        "game": {
+          ".validate": "newData.hasChildren(['round', 'seed', 'startAt', 'n'])"
+        },
+        "mv": {
+          "$round": {
+            "$id": {
+              ".validate": "newData.hasChildren(['c', 's', 'i']) && newData.child('c').isNumber() && newData.child('c').val() >= 0 && newData.child('c').val() <= 63"
+            }
+          }
+        },
+        "result": {
+          "$round": {
+            ".validate": "newData.hasChildren(['loser'])"
+          }
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
+    },
+    "kairou": {
+      "$code": {
+        ".read": "$code.length <= 20",
+        ".write": "$code.length <= 20",
+        "players": {
+          "$slot": {
+            ".validate": "($slot === '0' || $slot === '1') && newData.hasChildren(['id', 'name']) && newData.child('name').isString() && newData.child('name').val().length <= 8"
+          }
+        },
+        "ready": {
+          "$slot": {
+            ".validate": "($slot === '0' || $slot === '1') && newData.isNumber()"
+          }
+        },
+        "game": {
+          ".validate": "newData.hasChildren(['round', 'seed', 'startAt'])"
+        },
+        "st": {
+          "$slot": {
+            ".validate": "($slot === '0' || $slot === '1') && newData.hasChildren(['t', 'sc'])"
+          }
+        },
+        "end": {
+          "$round": {
+            "$slot": {
+              ".validate": "($slot === '0' || $slot === '1') && newData.hasChildren(['t', 'd', 'c', 'sc']) && newData.child('sc').isNumber() && newData.child('sc').val() < 1000000"
+            }
+          }
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
+    },
+    "sakugae": {
+      "$code": {
+        ".read": "$code.length <= 20",
+        ".write": "$code.length <= 20",
+        "players": {
+          "$slot": {
+            ".validate": "($slot === '0' || $slot === '1') && newData.hasChildren(['id', 'name']) && newData.child('name').isString() && newData.child('name').val().length <= 8"
+          }
+        },
+        "watchers": {
+          "$id": {
+            ".validate": "$id.length <= 24 && newData.child('name').isString() && newData.child('name').val().length <= 8"
+          }
+        },
+        "ready": {
+          "$slot": {
+            ".validate": "($slot === '0' || $slot === '1') && newData.isNumber()"
+          }
+        },
+        "game": {
+          ".validate": "newData.hasChildren(['round', 'startAt'])"
+        },
+        "st": {
+          ".validate": "newData.isString() && newData.val().length <= 12000"
+        },
+        "cmd": {
+          "$round": {
+            "$id": {
+              ".validate": "newData.hasChildren(['t']) && newData.child('t').isString() && newData.child('t').val().length <= 2"
+            }
+          }
+        },
+        "result": {
+          "$round": {
+            ".validate": "newData.hasChildren(['loser'])"
+          }
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
+    },
+    "eshi": {
+      "$code": {
+        ".read": "$code.length <= 20",
+        ".write": "$code.length <= 20",
+        "players": {
+          "$slot": {
+            ".validate": "($slot === '0' || $slot === '1') && newData.hasChildren(['id', 'name']) && newData.child('name').isString() && newData.child('name').val().length <= 8"
+          }
+        },
+        "ch": {
+          "$slot": {
+            ".validate": "($slot === '0' || $slot === '1') && newData.isString() && newData.val().length <= 400000"
+          }
+        },
+        "ready": {
+          "$slot": {
+            ".validate": "($slot === '0' || $slot === '1') && newData.isNumber()"
+          }
+        },
+        "game": {
+          ".validate": "newData.hasChildren(['round', 'startAt']) && newData.child('round').isNumber()"
+        },
+        "st": {
+          "$slot": {
+            ".validate": "($slot === '0' || $slot === '1') && newData.isString() && newData.val().length <= 600"
+          }
+        },
+        "hit": {
+          "$round": {
+            "$id": {
+              ".validate": "newData.hasChildren(['to', 'part', 'dmg']) && newData.child('dmg').isNumber() && newData.child('dmg').val() <= 100"
+            }
+          }
+        },
+        "end": {
+          "$round": {
+            ".validate": "newData.hasChildren(['winner'])"
+          }
+        },
+        "mode": {
+          ".validate": "newData.val() === 'normal' || newData.val() === 'raku'"
+        },
+        "rch": {
+          "$round": {
+            "$slot": {
+              ".validate": "($slot === '0' || $slot === '1') && newData.isString() && newData.val().length <= 400000"
+            }
+          }
+        },
+        "watchers": {
+          "$id": {
+            ".validate": "$id.length <= 24 && newData.hasChildren(['name']) && newData.child('name').isString() && newData.child('name').val().length <= 8"
+          }
+        },
+        "cheer": {
+          "$round": {
+            "$id": {
+              ".validate": "newData.hasChildren(['e', 'n', 't']) && newData.child('e').isNumber() && newData.child('e').val() >= 0 && newData.child('e').val() <= 5 && newData.child('n').isString() && newData.child('n').val().length <= 8 && newData.child('t').isNumber()"
+            }
+          }
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
+    },
+    "eshi_c": {
+      "$id": {
+        ".read": "true",
+        ".write": "(!data.exists() && newData.exists() && $id.length === 8 && !root.child('eshi_gone/' + $id).exists() && newData.parent().parent().child('eshi_meta/last').val() === $id) || (!newData.exists() && newData.parent().parent().child('eshi_meta/last').val() === $id && ((root.child('eshi_k/' + $id).exists() && newData.parent().parent().child('eshi_del/' + $id).val() === root.child('eshi_k/' + $id).val() && newData.parent().parent().child('eshi_gone/' + $id + '/w').val() === 'del') || (root.child('eshi_meta/n').val() > 4000 && data.child('u').val() < now - 259200000 && newData.parent().parent().child('eshi_gone/' + $id + '/w').val() === 'full')))",
+        ".validate": "newData.hasChildren(['d', 't', 'u'])",
+        "d": {
+          ".validate": "newData.isString() && newData.val().length <= 450000"
+        },
+        "n": {
+          ".validate": "newData.isString() && newData.val().length <= 8"
+        },
+        "a": {
+          ".validate": "newData.isString() && newData.val().length <= 8"
+        },
+        "t": {
+          ".validate": "newData.isNumber() && newData.val() <= now"
+        },
+        "u": {
+          ".write": "data.exists()",
+          ".validate": "newData.isNumber() && newData.val() <= now"
+        },
+        "uses": {
+          ".write": "data.exists()",
+          ".validate": "newData.isNumber() && ((!data.exists() && newData.val() === 0) || (data.exists() && newData.val() === data.val() + 1))"
+        },
+        "pub": {
+          ".validate": "newData.isBoolean()"
+        },
+        "par": {
+          ".validate": "newData.isString() && newData.val().length === 8"
+        },
+        "$other": {
+          ".validate": "false"
+        }
+      }
+    },
+    "eshi_pub": {
+      ".read": "true",
+      ".indexOn": [
+        "t",
+        "uses"
+      ],
+      "$id": {
+        ".write": "(!data.exists() && newData.parent().parent().child('eshi_c/' + $id).exists()) || (!newData.exists() && !newData.parent().parent().child('eshi_c/' + $id).exists())",
+        ".validate": "newData.hasChildren(['n', 'a', 't', 'u'])",
+        "n": {
+          ".validate": "newData.isString() && newData.val().length <= 8"
+        },
+        "a": {
+          ".validate": "newData.isString() && newData.val().length <= 8"
+        },
+        "t": {
+          ".validate": "newData.isNumber() && newData.val() <= now"
+        },
+        "u": {
+          ".write": "data.exists()",
+          ".validate": "newData.isNumber() && newData.val() <= now"
+        },
+        "uses": {
+          ".write": "data.exists()",
+          ".validate": "newData.isNumber() && ((!data.exists() && newData.val() === 0) || (data.exists() && newData.val() === data.val() + 1))"
+        },
+        "th": {
+          ".validate": "newData.isString() && newData.val().length <= 30000 && newData.val().beginsWith('data:image/')"
+        },
+        "rp": {
+          "$dev": {
+            ".write": "!data.exists() && $dev.length <= 16",
+            ".validate": "newData.val() === true"
+          }
+        },
+        "$other": {
+          ".validate": "false"
+        }
+      }
+    },
+    "eshi_u": {
+      ".read": "true",
+      ".indexOn": [
+        ".value"
+      ],
+      "$id": {
+        ".write": "(newData.parent().parent().child('eshi_c/' + $id).exists() && newData.exists()) || (!newData.exists() && !newData.parent().parent().child('eshi_c/' + $id).exists())",
+        ".validate": "newData.isNumber() && newData.val() <= now"
+      }
+    },
+    "eshi_k": {
+      "$id": {
+        ".write": "(!data.exists() && newData.parent().parent().child('eshi_c/' + $id).exists()) || (!newData.exists() && !newData.parent().parent().child('eshi_c/' + $id).exists())",
+        ".validate": "newData.isString() && newData.val().length >= 16 && newData.val().length <= 40"
+      }
+    },
+    "eshi_del": {
+      "$id": {
+        ".write": "true",
+        ".validate": "newData.isString() && newData.val().length <= 40"
+      }
+    },
+    "eshi_meta": {
+      ".read": "true",
+      ".write": "newData.exists()",
+      ".validate": "newData.hasChildren(['n', 'last']) && newData.child('n').isNumber() && newData.child('n').val() >= 0 && newData.child('last').isString() && newData.child('last').val().length === 8 && ((((!data.exists() && newData.child('n').val() === 1) || (data.exists() && newData.child('n').val() === data.child('n').val() + 1)) && newData.parent().child('eshi_c/' + newData.child('last').val()).exists() && !root.child('eshi_c/' + newData.child('last').val()).exists()) || (data.exists() && newData.child('n').val() === data.child('n').val() - 1 && root.child('eshi_c/' + newData.child('last').val()).exists() && !newData.parent().child('eshi_c/' + newData.child('last').val()).exists()))",
+      "n": {
+        ".validate": "newData.isNumber()"
+      },
+      "last": {
+        ".validate": "newData.isString()"
+      },
+      "$other": {
+        ".validate": "false"
+      }
+    },
+    "eshi_gone": {
+      "$id": {
+        ".read": "true",
+        ".write": "!data.exists() && root.child('eshi_c/' + $id).exists() && !newData.parent().parent().child('eshi_c/' + $id).exists()",
+        ".validate": "newData.hasChildren(['w', 't']) && (newData.child('w').val() === 'del' || newData.child('w').val() === 'full') && newData.child('t').isNumber() && newData.child('t').val() <= now"
+      }
+    },
+    "batbey": {
+      "$code": {
+        ".read": "$code.length <= 20",
+        ".write": "$code.length <= 20",
+        "players": {
+          "$slot": {
+            ".validate": "($slot === '0' || $slot === '1') && newData.hasChildren(['id', 'name']) && newData.child('name').isString() && newData.child('name').val().length <= 8"
+          }
+        },
+        "watchers": {
+          "$id": {
+            ".validate": "$id.length <= 24 && newData.hasChildren(['name']) && newData.child('name').isString() && newData.child('name').val().length <= 8"
+          }
+        },
+        "mode": {
+          ".validate": "newData.val() === 'normal' || newData.val() === 'raku'"
+        },
+        "ch": {
+          "$slot": {
+            ".validate": "($slot === '0' || $slot === '1') && newData.isString() && newData.val().length <= 300000"
+          }
+        },
+        "ready": {
+          "$slot": {
+            ".validate": "($slot === '0' || $slot === '1') && newData.isNumber()"
+          }
+        },
+        "game": {
+          ".validate": "newData.hasChildren(['round', 'phase', 'startAt']) && newData.child('round').isNumber()"
+        },
+        "rch": {
+          "$m": {
+            "$slot": {
+              ".validate": "($slot === '0' || $slot === '1') && newData.isString() && newData.val().length <= 300000"
+            }
+          }
+        },
+        "st": {
+          ".validate": "newData.isString() && newData.val().length <= 40000"
+        },
+        "cmd": {
+          "$m": {
+            "$id": {
+              ".validate": "newData.hasChildren(['k']) && newData.child('k').isString() && newData.child('k').val().length <= 8"
+            }
+          }
+        },
+        "cheer": {
+          "$m": {
+            "$id": {
+              ".validate": "newData.hasChildren(['e', 'n', 't']) && newData.child('e').isNumber() && newData.child('e').val() >= 0 && newData.child('e').val() <= 5 && newData.child('n').isString() && newData.child('n').val().length <= 8"
+            }
+          }
+        },
+        "$other": {
+          ".validate": "false"
+        }
+      }
+    },
+    "bb_c": {
+      "$id": {
+        ".read": "true",
+        ".write": "(!data.exists() && newData.exists() && $id.length === 8 && !root.child('bb_gone/' + $id).exists() && newData.parent().parent().child('bb_meta/last').val() === $id) || (!newData.exists() && newData.parent().parent().child('bb_meta/last').val() === $id && ((root.child('bb_k/' + $id).exists() && newData.parent().parent().child('bb_del/' + $id).val() === root.child('bb_k/' + $id).val() && newData.parent().parent().child('bb_gone/' + $id + '/w').val() === 'del') || (root.child('bb_meta/n').val() > 8000 && data.child('u').val() < now - 259200000 && newData.parent().parent().child('bb_gone/' + $id + '/w').val() === 'full')))",
+        ".validate": "newData.hasChildren(['d', 't', 'u'])",
+        "d": {
+          ".validate": "newData.isString() && newData.val().length <= 450000"
+        },
+        "n": {
+          ".validate": "newData.isString() && newData.val().length <= 8"
+        },
+        "a": {
+          ".validate": "newData.isString() && newData.val().length <= 8"
+        },
+        "t": {
+          ".validate": "newData.isNumber() && newData.val() <= now"
+        },
+        "u": {
+          ".write": "data.exists()",
+          ".validate": "newData.isNumber() && newData.val() <= now"
+        },
+        "uses": {
+          ".write": "data.exists()",
+          ".validate": "newData.isNumber() && ((!data.exists() && newData.val() === 0) || (data.exists() && newData.val() === data.val() + 1))"
+        },
+        "pub": {
+          ".validate": "newData.isBoolean()"
+        },
+        "par": {
+          ".validate": "newData.isString() && newData.val().length === 8"
+        },
+        "$other": {
+          ".validate": "false"
+        }
+      }
+    },
+    "bb_pub": {
+      ".read": "true",
+      ".indexOn": [
+        "t",
+        "uses"
+      ],
+      "$id": {
+        ".write": "(!data.exists() && newData.parent().parent().child('bb_c/' + $id).exists()) || (!newData.exists() && !newData.parent().parent().child('bb_c/' + $id).exists())",
+        ".validate": "newData.hasChildren(['n', 'a', 't', 'u'])",
+        "n": {
+          ".validate": "newData.isString() && newData.val().length <= 8"
+        },
+        "a": {
+          ".validate": "newData.isString() && newData.val().length <= 8"
+        },
+        "t": {
+          ".validate": "newData.isNumber() && newData.val() <= now"
+        },
+        "u": {
+          ".write": "data.exists()",
+          ".validate": "newData.isNumber() && newData.val() <= now"
+        },
+        "uses": {
+          ".write": "data.exists()",
+          ".validate": "newData.isNumber() && ((!data.exists() && newData.val() === 0) || (data.exists() && newData.val() === data.val() + 1))"
+        },
+        "th": {
+          ".validate": "newData.isString() && newData.val().length <= 30000 && newData.val().beginsWith('data:image/')"
+        },
+        "rp": {
+          "$dev": {
+            ".write": "!data.exists() && $dev.length <= 16",
+            ".validate": "newData.val() === true"
+          }
+        },
+        "$other": {
+          ".validate": "false"
+        }
+      }
+    },
+    "bb_u": {
+      ".read": "true",
+      ".indexOn": [
+        ".value"
+      ],
+      "$id": {
+        ".write": "(newData.parent().parent().child('bb_c/' + $id).exists() && newData.exists()) || (!newData.exists() && !newData.parent().parent().child('bb_c/' + $id).exists())",
+        ".validate": "newData.isNumber() && newData.val() <= now"
+      }
+    },
+    "bb_k": {
+      "$id": {
+        ".write": "(!data.exists() && newData.parent().parent().child('bb_c/' + $id).exists()) || (!newData.exists() && !newData.parent().parent().child('bb_c/' + $id).exists())",
+        ".validate": "newData.isString() && newData.val().length >= 16 && newData.val().length <= 40"
+      }
+    },
+    "bb_del": {
+      "$id": {
+        ".write": "true",
+        ".validate": "newData.isString() && newData.val().length <= 40"
+      }
+    },
+    "bb_gone": {
+      "$id": {
+        ".read": "true",
+        ".write": "!data.exists() && root.child('bb_c/' + $id).exists() && !newData.parent().parent().child('bb_c/' + $id).exists()",
+        ".validate": "newData.hasChildren(['w', 't']) && (newData.child('w').val() === 'del' || newData.child('w').val() === 'full') && newData.child('t').isNumber() && newData.child('t').val() <= now"
+      }
+    },
+    "bb_meta": {
+      ".read": "true",
+      ".write": "newData.exists()",
+      ".validate": "newData.hasChildren(['n', 'last']) && newData.child('n').isNumber() && newData.child('n').val() >= 0 && newData.child('last').isString() && newData.child('last').val().length === 8 && ((((!data.exists() && newData.child('n').val() === 1) || (data.exists() && newData.child('n').val() === data.child('n').val() + 1)) && newData.parent().child('bb_c/' + newData.child('last').val()).exists() && !root.child('bb_c/' + newData.child('last').val()).exists()) || (data.exists() && newData.child('n').val() === data.child('n').val() - 1 && root.child('bb_c/' + newData.child('last').val()).exists() && !newData.parent().child('bb_c/' + newData.child('last').val()).exists()))",
+      "n": {
+        ".validate": "newData.isNumber()"
+      },
+      "last": {
+        ".validate": "newData.isString()"
+      },
+      "$other": {
+        ".validate": "false"
+      }
+    },
+    "yukidama": {
+      "$code": {
+        ".read": "$code.length <= 20",
+        ".write": "$code.length <= 20",
+        "players": {
+          "$slot": {
+            ".validate": "($slot === '0' || $slot === '1') && newData.hasChildren(['id', 'name']) && newData.child('name').isString() && newData.child('name').val().length <= 8"
+          }
+        },
+        "watchers": {
+          "$id": {
+            ".validate": "$id.length <= 24 && newData.child('name').isString() && newData.child('name').val().length <= 8"
+          }
+        },
+        "ready": {
+          "$slot": {
+            ".validate": "($slot === '0' || $slot === '1') && newData.isNumber()"
+          }
+        },
+        "game": {
+          ".validate": "newData.hasChildren(['m', 'r', 'seed', 'startAt', 'sc'])"
+        },
+        "s": {
+          "$slot": {
+            ".validate": "($slot === '0' || $slot === '1') && newData.isString() && newData.val().length <= 400"
+          }
+        },
+        "ev": {
+          "$key": {
+            "$slot": {
+              "$id": {
+                ".validate": "($slot === '0' || $slot === '1') && newData.hasChildren(['t'])"
+              }
+            }
+          }
+        },
+        "pk": {
+          "$key": {
+            "$id": {
+              ".validate": "newData.isNumber() && (newData.val() === 0 || newData.val() === 1)"
+            }
+          }
+        },
+        "ko": {
+          "$key": {
+            ".validate": "newData.hasChildren(['l'])"
+          }
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
+    },
+    "pinchbowl": {
+      "$code": {
+        ".read": "$code.length <= 20",
+        ".write": "$code.length <= 20",
+        "players": {
+          "$slot": {
+            ".validate": "($slot === '0' || $slot === '1') && newData.hasChildren(['id', 'name']) && newData.child('name').isString() && newData.child('name').val().length <= 8"
+          }
+        },
+        "watchers": {
+          "$id": {
+            ".validate": "$id.length <= 24 && newData.child('name').isString() && newData.child('name').val().length <= 8"
+          }
+        },
+        "ready": {
+          "$slot": {
+            ".validate": "($slot === '0' || $slot === '1') && newData.isNumber()"
+          }
+        },
+        "game": {
+          ".validate": "newData.hasChildren(['m', 'seed'])"
+        },
+        "pk": {
+          "$m": {
+            "$slot": {
+              ".validate": "($slot === '0' || $slot === '1') && newData.isNumber()"
+            }
+          }
+        },
+        "aim": {
+          "$slot": {
+            ".validate": "($slot === '0' || $slot === '1') && newData.isString() && newData.val().length <= 40"
+          }
+        },
+        "th": {
+          "$m": {
+            "$k": {
+              ".validate": "newData.hasChildren(['x', 'ang', 'pow', 'spin'])"
+            }
+          }
+        },
+        "st": {
+          "$slot": {
+            ".validate": "($slot === '0' || $slot === '1') && newData.isString() && newData.val().length <= 8000"
+          }
+        },
+        "res": {
+          "$m": {
+            "$k": {
+              ".validate": "newData.hasChildren(['n', 'down'])"
+            }
+          }
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
+    },
+    "jimoto": {
+      "$code": {
+        ".read": "$code.length <= 20",
+        ".write": "$code.length <= 20",
+        "players": {
+          "$slot": {
+            ".validate": "($slot === '0' || $slot === '1') && newData.hasChildren(['id', 'name']) && newData.child('name').isString() && newData.child('name').val().length <= 8"
+          }
+        },
+        "watchers": {
+          "$id": {
+            ".validate": "$id.length <= 24 && newData.child('name').isString() && newData.child('name').val().length <= 8"
+          }
+        },
+        "ready": {
+          "$slot": {
+            ".validate": "($slot === '0' || $slot === '1') && newData.isNumber()"
+          }
+        },
+        "game": {
+          ".validate": "newData.hasChildren(['m'])"
+        },
+        "sel": {
+          "$slot": {
+            ".validate": "($slot === '0' || $slot === '1') && newData.hasChildren(['mode'])"
+          }
+        },
+        "pick": {
+          "$m": {
+            "$slot": {
+              ".validate": "($slot === '0' || $slot === '1') && newData.hasChildren(['id', 'mode']) && newData.child('id').isString() && newData.child('id').val().length <= 16"
+            }
+          }
+        },
+        "res": {
+          "$m": {
+            "$slot": {
+              ".validate": "($slot === '0' || $slot === '1') && newData.isString() && newData.val().length <= 80"
+            }
+          }
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
+    },
+    "qm": {
+      "$g": {
+        "$v": {
+          ".read": "$g.length <= 12 && $v.length <= 12",
+          "$id": {
+            ".write": "$id.length <= 24",
+            ".validate": "newData.hasChildren(['t']) && newData.child('t').isNumber() && (!newData.child('n').exists() || (newData.child('n').isString() && newData.child('n').val().length <= 8)) && (!newData.child('bn').exists() || (newData.child('bn').isString() && newData.child('bn').val().length <= 8)) && (!newData.child('code').exists() || (newData.child('code').isString() && newData.child('code').val().length <= 12)) && (!newData.child('by').exists() || (newData.child('by').isString() && newData.child('by').val().length <= 24)) && (!newData.child('cpu').exists() || newData.child('cpu').isBoolean()) && (!newData.child('ok').exists() || newData.child('ok').isBoolean()) && (!newData.child('no').exists() || newData.child('no').isBoolean())",
+            "$other": {
+              ".validate": "$other === 't' || $other === 'n' || $other === 'bn' || $other === 'code' || $other === 'by' || $other === 'cpu' || $other === 'ok' || $other === 'no'"
+            }
+          }
+        }
+      }
+    },
+    "pres": {
+      ".read": true,
+      "$id": {
+        ".write": "$id.length <= 24",
+        ".validate": "newData.hasChildren(['g', 's']) && newData.child('g').isString() && newData.child('g').val().length <= 12 && (newData.child('s').val() === 'w' || newData.child('s').val() === 'c' || newData.child('s').val() === 'p')",
+        "$other": {
+          ".validate": "$other === 'g' || $other === 's'"
+        }
+      }
+    },
+    "jm_chal": {
+      ".read": true,
+      ".indexOn": [
+        "t"
+      ],
+      "$id": {
+        ".write": "$id.length <= 24 && newData.exists() && (!data.exists() || (newData.child('e').val() === data.child('e').val() && newData.child('n').val() === data.child('n').val() && newData.child('d').val() === data.child('d').val() && newData.child('c').val() === data.child('c').val() && newData.child('m').val() === data.child('m').val() && newData.child('t').val() === data.child('t').val() && ((newData.child('w').val() === data.child('w').val() + 1 && newData.child('l').val() === data.child('l').val()) || (newData.child('l').val() === data.child('l').val() + 1 && newData.child('w').val() === data.child('w').val()))))",
+        ".validate": "newData.hasChildren(['e', 'n', 'd', 'c', 'm', 't', 'w', 'l']) && newData.child('e').isString() && newData.child('e').val().length <= 16 && newData.child('n').isString() && newData.child('n').val().length <= 8 && newData.child('d').isNumber() && newData.child('d').val() >= 0 && newData.child('d').val() <= 7 && newData.child('c').isString() && newData.child('c').val().length <= 60 && (newData.child('m').val() === 'pol' || newData.child('m').val() === 'nopol') && newData.child('t').isNumber() && newData.child('t').val() <= now && newData.child('w').isNumber() && newData.child('l').isNumber() && (data.exists() || (newData.child('w').val() === 0 && newData.child('l').val() === 0))",
+        "$other": {
+          ".validate": "$other === 'e' || $other === 'n' || $other === 'd' || $other === 'c' || $other === 'm' || $other === 't' || $other === 'w' || $other === 'l'"
+        }
+      }
     }
   }
 }

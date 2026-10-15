@@ -19,7 +19,7 @@
   class Room {
     constructor(db, code, name, info, cb) {
       this.db = db; this.code = clean(code);
-      this.name = (String(name || '').trim().slice(0, 8)) || 'ななし';
+      this.name = (window.QM ? QM.ng(name) : String(name || '').trim().slice(0, 8)) || 'ななし';
       this.info = info || {}; this.cb = cb || {};
       this.id = uid(); this.slot = -1;
       this.players = {}; this.watchers = {}; this.game = null; this.picks = {}; this.rd = {};
@@ -59,6 +59,7 @@
       this.on(this.root.child('players'), 'value', snap => {
         const prev = this.players;
         this.players = snap.val() || {};
+        if (window.QM) for (const k in this.players) if (this.players[k] && this.players[k].name) this.players[k].name = QM.ng(this.players[k].name);
         // 自分の席が消えた＝通信が一瞬切れた。空いていれば同じ席に戻る
         if (this.slot >= 0 && prev[this.slot] && !this.players[this.slot] && !this.left) this.reclaim();
         if (this.slot >= 0) {
