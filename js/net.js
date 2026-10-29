@@ -19,7 +19,7 @@
   class Room {
     constructor(db, code, name, info, cb) {
       this.db = db; this.code = clean(code);
-      this.name = (window.QM ? QM.ng(name) : String(name || '').trim().slice(0, 8)) || 'ななし';
+      this.name = (window.QM ? QM.ng(name) : String(name || '').trim().slice(0, 8)) || (window.I18N ? I18N.t('noname') : 'ななし');
       this.info = info || {}; this.cb = cb || {};
       this.id = uid(); this.slot = -1;
       this.players = {}; this.watchers = {}; this.game = null; this.picks = {}; this.rd = {};
@@ -36,7 +36,7 @@
     get opp() { return this.slot >= 0 ? this.players[1 - this.slot] : null; }
 
     async join() {
-      if (!this.code) throw new Error('合言葉を入れてください');
+      if (!this.code) throw new Error(window.I18N ? I18N.t('err_code_short') : '合言葉を入れてください');
       this.on(this.db.ref('.info/serverTimeOffset'), 'value', s => { this.offset = s.val() || 0; });
       if (!this.info.watch) {
         for (const s of [0, 1]) {

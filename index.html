@@ -45,39 +45,40 @@
   </div>
   <div class="hud-info-row"><div class="hud-info hidden" id="hud-info0"></div><div class="hud-info hidden" id="hud-info1"></div></div>
   <div id="count" class="count"></div>
-  <button id="btn-mine" class="mine-btn" aria-label="地雷"><span>地雷</span></button>
+  <button id="btn-mine" class="mine-btn" aria-label="地雷" data-ia="mine"><span>地雷</span></button>
   <div id="net-badge" class="net-badge hidden"></div>
 </div>
 <div id="bubbles"></div>
 <div id="banner" class="banner"></div>
-<button class="icon-btn" id="btn-menu" aria-label="メニュー">☰</button>
-<button class="icon-btn" id="btn-stamp" aria-label="スタンプ">☺</button>
+<button class="icon-btn" id="btn-menu" aria-label="メニュー" data-ia="menu">☰</button>
+<button class="icon-btn" id="btn-stamp" aria-label="スタンプ" data-ia="stamp">☺</button>
 <div id="stamp-pal" class="stamp-pal hidden"></div>
 
 <!-- ===== タイトル ===== -->
 <section id="title" class="screen active">
   <div class="title-wrap">
     <div class="logo-box">
-      <h1 class="logo"><span class="l1">ハネ</span><span class="l2">タンク</span></h1>
-      <p class="tagline">はね返る弾で撃ち合う、おもちゃの戦車バトル</p>
+      <h1 class="logo"><span class="l1" data-i="logo1">ハネ</span><span class="l2" data-i="logo2">タンク</span></h1>
+      <p class="tagline" data-i="tagline">はね返る弾で撃ち合う、おもちゃの戦車バトル</p>
     </div>
     <div class="menu">
       <div class="menu-card">
-        <p class="menu-label">CPUとたいせん</p>
+        <p class="menu-label" data-i="vs_cpu">CPUとたいせん</p>
         <div class="level-row">
-          <button class="btn lv" data-level="easy">よわい</button>
-          <button class="btn lv" data-level="normal">ふつう</button>
-          <button class="btn lv" data-level="hard">つよい</button>
+          <button class="btn lv" data-level="easy" data-i="easy">よわい</button>
+          <button class="btn lv" data-level="normal" data-i="normal">ふつう</button>
+          <button class="btn lv" data-level="hard" data-i="hard">つよい</button>
         </div>
       </div>
-      <button class="btn wide indigo" id="btn-online">あいことばで対戦</button>
-      <button class="btn wide red" id="btn-local">ふたりで（同じPC）</button>
+      <button class="btn wide indigo" id="btn-online" data-i="online">あいことばで対戦</button>
+      <button class="btn wide red" id="btn-local" data-i="local">ふたりで（同じPC）</button>
       <div class="menu-sub">
-        <button class="btn sub" id="btn-practice">れんしゅう</button>
-        <button class="btn sub" id="btn-custom">せんしゃ</button>
-        <button class="btn sub" id="btn-howto">あそびかた</button>
+        <button class="btn sub" id="btn-practice" data-i="practice">れんしゅう</button>
+        <button class="btn sub" id="btn-custom" data-i="tank">せんしゃ</button>
+        <button class="btn sub" id="btn-howto" data-i="howto">あそびかた</button>
       </div>
-      <a class="home-link" href="https://nasubi-no-oniwa.github.io/">なすびのお庭へ</a>
+      <a class="home-link" href="https://nasubi-no-oniwa.github.io/" data-i="home">なすびのお庭へ</a>
+      <div class="langs" role="group" aria-label="Language"><button type="button" data-lang="ja">日本語</button><button type="button" data-lang="en">English</button><button type="button" data-lang="zh">繁中</button><button type="button" data-lang="ko">한국어</button></div>
     </div>
   </div>
 </section>
@@ -85,27 +86,27 @@
 <!-- ===== オンライン ===== -->
 <section id="online" class="screen">
   <div class="card">
-    <h2>あいことばで対戦</h2>
-    <label class="field"><span>なまえ</span><input id="in-name" maxlength="8" placeholder="ななし" autocomplete="off"></label>
-    <label class="field"><span>あいことば</span><input id="in-code" maxlength="12" inputmode="numeric" placeholder="4けたの数字など" autocomplete="off"><button class="btn mini" id="btn-dice" type="button">おまかせ</button></label>
-    <p class="note">同じ「あいことば」を入れた人と対戦できます。3人目からは観戦になります。</p>
+    <h2 data-i="online">あいことばで対戦</h2>
+    <label class="field"><span data-i="name">なまえ</span><input id="in-name" maxlength="8" placeholder="ななし" data-ip="noname" autocomplete="off"></label>
+    <label class="field"><span data-i="passcode">あいことば</span><input id="in-code" maxlength="12" inputmode="numeric" placeholder="4けたの数字など" data-ip="ex_code" autocomplete="off"><button class="btn mini" id="btn-dice" type="button" data-i="dice">おまかせ</button></label>
+    <p class="note" data-i="online_note">同じ「あいことば」を入れた人と対戦できます。3人目からは観戦になります。</p>
     <div class="row">
-      <button class="btn indigo" id="btn-join">対戦する</button>
-      <button class="btn ghost" id="btn-watch">観戦だけ</button>
+      <button class="btn indigo" id="btn-join" data-i="do_play">対戦する</button>
+      <button class="btn ghost" id="btn-watch" data-i="watch_only">観戦だけ</button>
     </div>
     <p class="err" id="online-err"></p>
-    <button class="btn back" data-back>もどる</button>
+    <button class="btn back" data-back data-i="back">もどる</button>
   </div>
 </section>
 
 <section id="wait" class="screen">
   <div class="card">
-    <h2>相手を待っています</h2>
-    <p class="code-big">あいことば <b id="wait-code">----</b></p>
-    <p class="note" id="wait-note">招待リンクを送るか、相手に同じあいことばを入れてもらってね</p>
-    <div class="row"><button class="btn indigo" id="btn-copy">招待リンクを送る</button></div>
+    <h2 data-i="wait_title">相手を待っています</h2>
+    <p class="code-big"><span data-i="code_label">あいことば </span><b id="wait-code">----</b></p>
+    <p class="note" id="wait-note" data-i="invite_note">招待リンクを送るか、相手に同じあいことばを入れてもらってね</p>
+    <div class="row"><button class="btn indigo" id="btn-copy" data-i="invite">招待リンクを送る</button></div>
     <div class="spinner"></div>
-    <button class="btn back" id="btn-wait-leave">やめる</button>
+    <button class="btn back" id="btn-wait-leave" data-i="cancel">やめる</button>
   </div>
 </section>
 
@@ -114,14 +115,14 @@
   <div class="panel skill-panel">
     <div class="sp-head">
       <div class="sp-title"><span id="sp-who">スキルをふろう</span><small id="sp-battle">1戦目・ステージ：ひろば</small></div>
-      <div class="sp-points"><small>のこり</small><b id="sp-left">6</b><small>pt</small></div>
+      <div class="sp-points"><small data-i="left">のこり</small><b id="sp-left">6</b><small>pt</small></div>
       <div class="timer-ring" id="sp-timer"><svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="17"/><circle class="fg" cx="20" cy="20" r="17"/></svg><span>30</span></div>
     </div>
     <div id="sp-rows"></div>
     <div class="sp-foot">
       <span class="opp-state" id="sp-opp"></span>
-      <button class="btn mini ghost" id="sp-auto">おまかせ</button>
-      <button class="btn mini ghost" id="sp-reset">もとにもどす</button>
+      <button class="btn mini ghost" id="sp-auto" data-i="auto">おまかせ</button>
+      <button class="btn mini ghost" id="sp-reset" data-i="reset">もとにもどす</button>
       <button class="btn go" id="sp-ok">準備OK</button>
     </div>
   </div>
@@ -131,9 +132,9 @@
 <section id="place" class="screen pass">
   <div class="place-bar">
     <div class="timer-ring small" id="pl-timer"><svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="17"/><circle class="fg" cx="20" cy="20" r="17"/></svg><span>20</span></div>
-    <div class="pl-text"><b id="pl-who">ブロックを置こう</b><small>自分の陣地をタップ。もう一度タップで取り消し</small></div>
-    <button class="btn kind hard sel" data-kind="1"><i></i>かたい <b id="pl-n1">2</b></button>
-    <button class="btn kind soft" data-kind="2"><i></i>こわれる <b id="pl-n2">2</b></button>
+    <div class="pl-text"><b id="pl-who">ブロックを置こう</b><small data-i="place_hint">自分の陣地をタップ。もう一度タップで取り消し</small></div>
+    <button class="btn kind hard sel" data-kind="1"><i></i><span data-i="hard_b">かたい </span><b id="pl-n1">2</b></button>
+    <button class="btn kind soft" data-kind="2"><i></i><span data-i="soft_b">こわれる </span><b id="pl-n2">2</b></button>
     <span class="opp-state" id="pl-opp"></span>
     <button class="btn go" id="pl-ok">準備OK</button>
   </div>
@@ -144,7 +145,7 @@
   <div class="card center">
     <h2 id="cu-title">2Pの番です</h2>
     <p class="note" id="cu-note">1Pは画面を見ないでね</p>
-    <button class="btn go" id="cu-ok">はじめる</button>
+    <button class="btn go" id="cu-ok" data-i="begin">はじめる</button>
   </div>
 </section>
 
@@ -158,9 +159,9 @@
     </div>
     <p class="res-record" id="res-record"></p>
     <div class="row">
-      <button class="btn ghost" id="res-replay">リプレイ</button>
+      <button class="btn ghost" id="res-replay" data-i="replay">リプレイ</button>
       <button class="btn go" id="res-next">つぎへ</button>
-      <button class="btn ghost hidden" id="res-title-btn">タイトルへ</button>
+      <button class="btn ghost hidden" id="res-title-btn" data-i="to_title">タイトルへ</button>
     </div>
     <p class="note" id="res-note"></p>
   </div>
@@ -169,9 +170,9 @@
 <!-- ===== メニュー ===== -->
 <section id="menu" class="screen">
   <div class="card">
-    <h2>メニュー</h2>
+    <h2 data-i="menu">メニュー</h2>
     <div class="col">
-      <button class="btn go" id="mn-resume">つづける</button>
+      <button class="btn go" id="mn-resume" data-i="resume">つづける</button>
       <button class="btn ghost" id="mn-sound">音：オン</button>
       <button class="btn ghost" id="mn-quality">画質：じどう</button>
       <button class="btn ghost" id="mn-vib">振動：オン</button>
@@ -183,26 +184,26 @@
 <!-- ===== せんしゃカスタム ===== -->
 <section id="custom" class="screen pass">
   <div class="panel custom-panel">
-    <h2>せんしゃ</h2>
-    <p class="note">見た目だけ変わります（強さは同じ）</p>
-    <div class="cu-tabs" id="cu-tabs"><button data-p="0" class="sel">あなた（1P）</button><button data-p="1">2P</button></div>
+    <h2 data-i="tank">せんしゃ</h2>
+    <p class="note" data-i="look_note">見た目だけ変わります（強さは同じ）</p>
+    <div class="cu-tabs" id="cu-tabs"><button data-p="0" class="sel" data-i="you_1p">あなた（1P）</button><button data-p="1">2P</button></div>
     <p class="note" id="cu-note2"></p>
-    <div class="cu-label">いろ</div>
+    <div class="cu-label" data-i="color">いろ</div>
     <div class="swatches" id="cu-colors"></div>
-    <div class="cu-label">もよう</div>
+    <div class="cu-label" data-i="pattern">もよう</div>
     <div class="patterns" id="cu-patterns"></div>
-    <button class="btn go" data-back>きめた</button>
+    <button class="btn go" data-back data-i="decide">きめた</button>
   </div>
 </section>
 
 <!-- ===== れんしゅう ===== -->
 <section id="practice" class="screen pass">
   <div class="panel prac-panel" id="prac-panel">
-    <div class="prac-head"><b>れんしゅう</b><button class="btn mini ghost" id="pr-fold">たたむ</button></div>
+    <div class="prac-head"><b data-i="practice">れんしゅう</b><button class="btn mini ghost" id="pr-fold" data-i="fold">たたむ</button></div>
     <div id="pr-body">
       <div id="pr-rows"></div>
       <div class="pr-stages" id="pr-stages"></div>
-      <button class="btn mini red" id="pr-quit">おわる</button>
+      <button class="btn mini red" id="pr-quit" data-i="finish">おわる</button>
     </div>
   </div>
 </section>
@@ -210,44 +211,45 @@
 <!-- ===== あそびかた ===== -->
 <section id="howto" class="screen">
   <div class="card howto">
-    <h2>あそびかた</h2>
+    <h2 data-i="howto">あそびかた</h2>
     <div class="howto-body">
-      <h3>ルール</h3>
+      <h3 data-i="hw_rules">ルール</h3>
       <ul>
-        <li>弾が1発当たったら負け。<b>自分の弾・地雷でもやられます</b>。</li>
-        <li>弾は壁ではね返ります。弾どうしがぶつかると両方消えます。</li>
-        <li>同時に撃てる弾は3発まで（戦車の足元の点が残りの数）、地雷は2個まで。</li>
-        <li>地雷は少したつか、弾が当たると爆発。<b>ピンクのブロック</b>をこわせます。</li>
-        <li>穴は弾は通るけど、戦車は入れません。</li>
-        <li>2本先取。90秒たつと外側から壁がせまってきます。</li>
-        <li>同時にやられたら引き分け。すぐにもう一回。</li>
+        <li data-ih="r1">弾が1発当たったら負け。<b>自分の弾・地雷でもやられます</b>。</li>
+        <li data-ih="r2">弾は壁ではね返ります。弾どうしがぶつかると両方消えます。</li>
+        <li data-ih="r3">同時に撃てる弾は3発まで（戦車の足元の点が残りの数）、地雷は2個まで。</li>
+        <li data-ih="r4">地雷は少したつか、弾が当たると爆発。<b>ピンクのブロック</b>をこわせます。</li>
+        <li data-ih="r5">穴は弾は通るけど、戦車は入れません。</li>
+        <li data-ih="r6">2本先取。90秒たつと外側から壁がせまってきます。</li>
+        <li data-ih="r7">同時にやられたら引き分け。すぐにもう一回。</li>
       </ul>
-      <h3>1戦ごとの流れ</h3>
+      <h3 data-i="hw_flow">1戦ごとの流れ</h3>
       <ul>
-        <li><b>スキル（30秒）</b>：ポイントを4つの性能にふります。1戦目6pt → 9pt → 12pt。毎回ふり直し。迷ったら「おまかせ」。</li>
-        <li>たまの速さ・たまの大きさは、上げても下げてもポイントを使います。</li>
-        <li>はねかえりは上げるだけ（1〜2で1回、3〜4で2回、5〜6で3回、7で4回）。</li>
-        <li>戦車を大きくするとポイントがもらえます（小さくするとポイントを使う）。大きい戦車はせまい道を通れません。</li>
-        <li><b>ブロック（20秒）</b>：自分の陣地に、かたいブロック2個とこわれるブロック2個を置けます。置いたブロックは戦いが始まるまで相手には見えません。</li>
-        <li>相手の性能は、1戦終わるまでわかりません。</li>
+        <li data-ih="f1"><b>スキル（30秒）</b>：ポイントを4つの性能にふります。1戦目6pt → 9pt → 12pt。毎回ふり直し。迷ったら「おまかせ」。</li>
+        <li data-ih="f2">たまの速さ・たまの大きさは、上げても下げてもポイントを使います。</li>
+        <li data-ih="f3">はねかえりは上げるだけ（1〜2で1回、3〜4で2回、5〜6で3回、7で4回）。</li>
+        <li data-ih="f4">戦車を大きくするとポイントがもらえます（小さくするとポイントを使う）。大きい戦車はせまい道を通れません。</li>
+        <li data-ih="f5"><b>ブロック（20秒）</b>：自分の陣地に、かたいブロック2個とこわれるブロック2個を置けます。置いたブロックは戦いが始まるまで相手には見えません。</li>
+        <li data-ih="f6">相手の性能は、1戦終わるまでわかりません。</li>
       </ul>
-      <h3>そうさ</h3>
+      <h3 data-i="hw_ctrl">そうさ</h3>
       <ul>
-        <li><b>スマホ（横向き）</b>：左側で移動、右側をドラッグしてねらい、はなすと発射。ちょんとタップでも発射。右下のボタンで地雷。</li>
-        <li><b>PC</b>：WASDで移動、マウスでねらい、クリックで発射、右クリックかスペースで地雷。</li>
-        <li><b>同じPCで2人</b>：1P WASD移動・Q/Eで砲台・Fで発射・Gで地雷。2P 矢印で移動・，／．で砲台・／で発射・右Shiftで地雷。</li>
-        <li><b>オンライン</b>：部屋を作ったら「招待リンクを送る」でLINEなどに送れます。右上の☺でスタンプ。</li>
-        <li><b>コントローラー</b>：左スティックで移動、右スティックでねらい、RかAで発射、LかBで地雷。</li>
+        <li data-ih="c1"><b>スマホ（横向き）</b>：左側で移動、右側をドラッグしてねらい、はなすと発射。ちょんとタップでも発射。右下のボタンで地雷。</li>
+        <li data-ih="c2"><b>PC</b>：WASDで移動、マウスでねらい、クリックで発射、右クリックかスペースで地雷。</li>
+        <li data-ih="c3"><b>同じPCで2人</b>：1P WASD移動・Q/Eで砲台・Fで発射・Gで地雷。2P 矢印で移動・，／．で砲台・／で発射・右Shiftで地雷。</li>
+        <li data-ih="c4"><b>オンライン</b>：部屋を作ったら「招待リンクを送る」でLINEなどに送れます。右上の☺でスタンプ。</li>
+        <li data-ih="c5"><b>コントローラー</b>：左スティックで移動、右スティックでねらい、RかAで発射、LかBで地雷。</li>
       </ul>
     </div>
-    <button class="btn back" data-back>もどる</button>
+    <button class="btn back" data-back data-i="back">もどる</button>
   </div>
 </section>
 
-<div id="rotate"><div class="rot-box"><div class="rot-phone"></div><p>スマホを<b>横向き</b>にしてね</p></div></div>
+<div id="rotate"><div class="rot-box"><div class="rot-phone"></div><p data-ih="rotate">スマホを<b>横向き</b>にしてね</p></div></div>
 <div id="toast" class="toast"></div>
 
 <script src="lib/three.min.js"></script>
+<script src="js/i18n.js"></script>
 <script src="js/config.js"></script>
 <script src="js/sim.js"></script>
 <script src="js/sound.js"></script>

@@ -19,6 +19,7 @@
 (function () {
   const QM = window.QM = window.QM || {};
   const DBURL = 'https://sakasama-drop-default-rtdb.asia-southeast1.firebasedatabase.app';
+  const T = (k, v) => (window.I18N ? I18N.t(k, v) : k);
   const WAIT_CPU_SEC = 20;      // これだけ待っても相手がいなければ「CPUで待つ」を出す
   const ACCEPT_SEC = 30;        // 相手が見つかったときに「対戦する」を押せる時間
   const SCAN_MS = 3500;         // 待っている間、ほかの人をさがし直す間隔
@@ -77,7 +78,7 @@
   // ---------------------------------------------
   QM.jstHour = () => new Date(Date.now() + 9 * 3600 * 1000).getUTCHours();
   QM.isPrime = () => QM.jstHour() === 21;
-  QM.primeText = () => (QM.isPrime() ? '🔥 いま対戦タイム！（22時まで）' : '🌙 毎晩21時〜22時は対戦タイム');
+  QM.primeText = () => T(QM.isPrime() ? 'qm_prime_hot' : 'qm_prime');
 
   // ---------------------------------------------
   //  人数（30秒に1回だけ見に行く。つながりっぱなしにしないので、上限を使わない）
@@ -204,7 +205,7 @@
     let anc = document.querySelector(a.anchor);
     if (anc && !document.getElementById('qm-btn')) {
       const b = document.createElement('button'); b.type = 'button'; b.id = 'qm-btn'; b.className = (a.btnClass || anc.className) + ' qm-start';
-      b.textContent = 'だれかと対戦'; b.onclick = () => QM.open();
+      b.textContent = T('qm_btn'); b.setAttribute('data-i', 'qm_btn'); b.onclick = () => QM.open();
       // ボタンを横ならびの行に入れたいゲーム用：a.wrapClass の箱に入れる
       let node = b; if (a.wrapClass) { node = document.createElement('div'); node.className = a.wrapClass; node.appendChild(b); }
       if (a.anchorUp) for (let i = 0; i < a.anchorUp; i++) anc = anc.parentElement;
@@ -226,7 +227,7 @@
     try {
       const all = await QM.countAll(); lastCounts = all;
       const m = all[A.game] || { wait: 0, pairs: 0 };
-      if (el) el.innerHTML = '対戦待ち <b>' + m.wait + '</b>人・対戦中 <b>' + m.pairs + '</b>組<br><span class="qm-prime' + (QM.isPrime() ? ' hot' : '') + '">' + esc(QM.primeText()) + '</span>';
+      if (el) el.innerHTML = T('qm_stat', { w: m.wait, p: m.pairs }) + '<br><span class="qm-prime' + (QM.isPrime() ? ' hot' : '') + '">' + esc(QM.primeText()) + '</span>';
       const w = $cc('#qm-w'); if (w) w.textContent = Math.max(0, m.wait - (S.reg ? 1 : 0));
     } catch (e) {
       if (el) el.innerHTML = '<span class="qm-prime' + (QM.isPrime() ? ' hot' : '') + '">' + esc(QM.primeText()) + '</span>';
@@ -239,6 +240,7 @@
     document.addEventListener('visibilitychange', () => { if (!document.hidden) refreshCounts(); });
   }
   QM.refreshCounts = refreshCounts;
+  document.addEventListener('langchange', () => { if (A) refreshCounts(); });
 
   // ---------------------------------------------
   //  入口：なまえを入れて「さがす」
@@ -246,18 +248,18 @@
   QM.open = function () {
     if (S.phase !== 'idle') return;
     const nm = ls.get(A.nameKey, '') || '';
-    card(`<h3>だれかと対戦</h3>
-      <p class="qm-sub">いま待っている人と、自動でつながります。</p>
-      <label class="qm-fld">なまえ<input id="qm-name" maxlength="8" autocomplete="off" placeholder="ななし" value="${esc(nm)}"></label>
+    card(`<h3>${T('qm_btn')}</h3>
+      <p class="qm-sub">${T('qm_sub')}</p>
+      <label class="qm-fld">${T('name')}<input id="qm-name" maxlength="8" autocomplete="off" placeholder="${esc(T('noname'))}" value="${esc(nm)}"></label>
       <p class="qm-err" id="qm-err"></p>
-      <button class="qm-b" id="qm-go">さがす</button>
-      <button class="qm-b sub" id="qm-close">もどる</button>
+      <button class="qm-b" id="qm-go">${T('qm_go')}</button>
+      <button class="qm-b sub" id="qm-close">${T('back')}</button>
       <span class="qm-prime${QM.isPrime() ? ' hot' : ''}">${esc(QM.primeText())}</span>`);
     $c('#qm-go').onclick = () => {
       const n = $c('#qm-name').value.trim().slice(0, 8);
-      if (n && QM.isBad(n)) { $c('#qm-err').textContent = 'その名前は使えません。ほかの名前にしてね'; return; }
+      if (n && QM.isBad(n)) { $c('#qm-err').textContent = T('qm_badname'); return; }
       ls.set(A.nameKey, n);
-      QM.search(n || 'ななし');
+      QM.search(n || T('noname'));
     };
     $c('#qm-name').addEventListener('keydown', e => { if (e.key === 'Enter') $c('#qm-go').click(); });
     $c('#qm-close').onclick = () => closeCard();
@@ -267,14 +269,14 @@
   //  さがす
   // ---------------------------------------------
   QM.search = async function (name) {
-    if (name != null) S.name = QM.ng(name) || 'ななし';
-    if (!S.name) S.name = QM.ng(ls.get(A.nameKey, '')) || 'ななし';
+    if (name != null) S.name = QM.ng(name) || T('noname');
+    if (!S.name) S.name = QM.ng(ls.get(A.nameKey, '')) || T('noname');
     cleanup(true);
     await unregister();
     S.phase = 'search'; S.random = false; S.code = null; S.t0 = Date.now(); S.tries = 0; S.ignoreUntil = 0;
     showSearching();
     try { db = db || await A.getDb(); }
-    catch (e) { S.phase = 'idle'; showError(e.message || 'つながりませんでした'); return; }
+    catch (e) { S.phase = 'idle'; showError(e.message || T('err_conn')); return; }
     if (S.phase !== 'search') return;
     S.id = uid();
     setPres('w');
@@ -283,21 +285,21 @@
   };
 
   function showSearching() {
-    card(`<h3>相手をさがしています</h3>
+    card(`<h3>${T('qm_searching')}</h3>
       <div class="qm-dots"><i></i><i></i><i></i></div>
       <p class="qm-big" id="qm-time">0:00</p>
-      <p class="qm-sub">いま対戦待ち <b id="qm-w">-</b>人</p>
+      <p class="qm-sub">${T('qm_wait_pre')}<b id="qm-w">-</b>${T('qm_wait_post')}</p>
       <p class="qm-err" id="qm-err"></p>
-      ${A.cpu ? `<button class="qm-b alt" id="qm-cpu" hidden>${esc(A.cpuLabel || 'CPUと遊びながら待つ')}</button>` : ''}
-      <button class="qm-b sub" id="qm-cancel">やめる</button>
+      ${A.cpu ? `<button class="qm-b alt" id="qm-cpu" hidden>${esc((typeof A.cpuLabel === 'function' ? A.cpuLabel() : A.cpuLabel) || T('qm_cpu'))}</button>` : ''}
+      <button class="qm-b sub" id="qm-cancel">${T('qm_cancel')}</button>
       <span class="qm-prime${QM.isPrime() ? ' hot' : ''}">${esc(QM.primeText())}</span>`);
     $c('#qm-cancel').onclick = () => QM.cancel();
     const cb = $c('#qm-cpu'); if (cb) cb.onclick = () => goCpu();
     refreshCounts();
   }
   function showError(msg) {
-    card(`<h3>だれかと対戦</h3><p class="qm-err">${esc(msg)}</p>
-      <button class="qm-b" id="qm-retry">もう一度さがす</button><button class="qm-b sub" id="qm-close">もどる</button>`);
+    card(`<h3>${T('qm_btn')}</h3><p class="qm-err">${esc(msg)}</p>
+      <button class="qm-b" id="qm-retry">${T('qm_retry')}</button><button class="qm-b sub" id="qm-close">${T('back')}</button>`);
     $c('#qm-retry').onclick = () => QM.search();
     $c('#qm-close').onclick = () => closeCard();
   }
@@ -305,7 +307,7 @@
   function tick() {
     const el = $cc('#qm-time'); if (el) el.textContent = mmss(Date.now() - S.t0);
     if (S.phase === 'search' && Date.now() - S.t0 > WAIT_CPU_SEC * 1000) { const b = $c('#qm-cpu'); if (b && b.hidden) { b.hidden = false; const e = $c('#qm-err'); if (e && !e.textContent) e.textContent = ''; } }
-    if (S.phase === 'cpu') { const t = $b('#qm-bt'); if (t) t.textContent = '相手をさがしています… ' + mmss(Date.now() - S.t0); }
+    if (S.phase === 'cpu') { const t = $b('#qm-bt'); if (t) t.textContent = T('qm_searching_t', { t: mmss(Date.now() - S.t0) }); }
     if (S.phase === 'found' && S.foundUntil) {
       const left = Math.max(0, Math.ceil((S.foundUntil - Date.now()) / 1000)); const t = $b('#qm-fl'); if (t) t.textContent = left;
       if (left <= 0) declineFound();
@@ -377,7 +379,7 @@
     // 相手の「OK」を待つ
     S.phase = 'claim';
     const wait = c.cpu ? OK_WAIT_CPU_MS : OK_WAIT_MS;
-    if (c.cpu) { const e = $c('#qm-err'); if (e) e.textContent = 'CPUと遊んでいる人に声をかけています…'; }
+    if (c.cpu) { const e = $c('#qm-err'); if (e) e.textContent = T('qm_calling'); }
     const ans = await new Promise(resolve => {
       let done = false;
       const fin = v => { if (done) return; done = true; cref.off('value', fn); clearTimeout(tm); resolve(v); };
@@ -392,7 +394,7 @@
     // 返事がない札は、もう使われていないので片づける
     if (ans === 'timeout' && !c.cpu) { try { await cref.transaction(cur => { if (!cur) return cur; if (cur.by === S.id && !cur.ok) return null; return; }); } catch (e) {} }
     S.phase = 'search';
-    const e = $c('#qm-err'); if (e) e.textContent = ans === 'no' ? '相手が見送りました。ほかの人をさがします' : '';
+    const e = $c('#qm-err'); if (e) e.textContent = ans === 'no' ? T('qm_declined') : '';
     await unlockSelf();
     return false;
   }
@@ -426,29 +428,29 @@
     try { A.cpu(); } catch (e) { console.error(e); }
   }
   function showCpuBar() {
-    bar(`<span id="qm-bt">相手をさがしています… ${mmss(Date.now() - S.t0)}</span><button class="x" id="qm-bx">やめる</button>`);
+    bar(`<span id="qm-bt">${T('qm_searching_t', { t: mmss(Date.now() - S.t0) })}</span><button class="x" id="qm-bx">${T('qm_cancel')}</button>`);
     $b('#qm-bx').onclick = () => QM.cancel(true);
   }
   // だれかから声をかけられた（自分はCPU中）
   function askFound(v) {
     if (S.phase === 'found' && S.foundFrom && S.foundFrom.by === v.by && S.foundFrom.code === v.code) return;   // 同じ知らせが2回来た
     S.phase = 'found'; S.foundFrom = v; S.foundUntil = Date.now() + ACCEPT_SEC * 1000;
-    bar(`<span>相手が見つかりました！</span><button id="qm-ok">対戦する <b id="qm-fl">${ACCEPT_SEC}</b></button><button class="x" id="qm-no">見送る</button>`, 'found');
+    bar(`<span>${T('qm_found')}</span><button id="qm-ok">${T('qm_play')} <b id="qm-fl">${ACCEPT_SEC}</b></button><button class="x" id="qm-no">${T('qm_pass')}</button>`, 'found');
     $b('#qm-ok').onclick = () => { const code = v.code; S.foundUntil = 0; ent().update({ ok: true }); unregister(3000); quitThen(() => go(code, false)); };
     $b('#qm-no').onclick = () => declineFound();
   }
   // CPU中に、待っている人を見つけた（自分から声をかけるか聞く）
   function offerFound(c) {
     S.phase = 'found'; S.offer = c; S.foundUntil = Date.now() + ACCEPT_SEC * 1000;
-    bar(`<span>対戦できる相手がいます！</span><button id="qm-ok">対戦する <b id="qm-fl">${ACCEPT_SEC}</b></button><button class="x" id="qm-no">見送る</button>`, 'found');
+    bar(`<span>${T('qm_avail')}</span><button id="qm-ok">${T('qm_play')} <b id="qm-fl">${ACCEPT_SEC}</b></button><button class="x" id="qm-no">${T('qm_pass')}</button>`, 'found');
     $b('#qm-ok').onclick = async () => {
       const off = S.offer; S.offer = null; S.foundUntil = 0;
-      bar('<span>つないでいます…</span>');
+      bar('<span>' + T('connecting') + '</span>');
       quitThen(async () => {
         S.phase = 'search'; setPres('w'); showSearching();
         await unregister();
         const ok = await claim(Object.assign({}, off, { cpu: false }));
-        if (!ok && S.phase === 'search') { const e = $c('#qm-err'); if (e) e.textContent = 'さっきの相手は、ほかの人と対戦を始めました。もう少し待ってね'; schedule(); }
+        if (!ok && S.phase === 'search') { const e = $c('#qm-err'); if (e) e.textContent = T('qm_taken'); schedule(); }
       });
     };
     $b('#qm-no').onclick = () => declineFound();
@@ -482,18 +484,18 @@
     S.phase = 'joining'; S.code = code; S.random = true;
     setPres('p');
     closeBar();
-    card(`<h3>相手が見つかりました！</h3><div class="qm-dots"><i></i><i></i><i></i></div><p>つないでいます…</p>`);
+    card(`<h3>${T('qm_found')}</h3><div class="qm-dots"><i></i><i></i><i></i></div><p>${T('connecting')}</p>`);
     clearTimeout(S.joinT);
     S.joinT = setTimeout(() => {
       if (S.phase !== 'joining') return;
       const c = S.code; S.phase = 'idle'; S.random = false;
       try { if (A.quit) A.quit(); } catch (e) {}
       setPres(null);
-      showError('相手とつながりませんでした（' + c.slice(-3) + '）');
+      showError(T('qm_fail', { c: c.slice(-3) }));
     }, JOIN_TIMEOUT_MS);
     const run = () => {
       try { if (A.prep) A.prep(); } catch (e) { console.error(e); }
-      try { A.join(code, S.name); } catch (e) { console.error(e); showError('入れませんでした'); }
+      try { A.join(code, S.name); } catch (e) { console.error(e); showError(T('qm_nojoin')); }
     };
     // 声をかけられた側は、少しだけ待ってから入る（声をかけた側が先に部屋を作る）
     setTimeout(run, claimer ? 0 : 400);
@@ -533,7 +535,7 @@
     if (!box) return;
     if (!b) {
       b = document.createElement('button'); b.type = 'button'; b.id = 'qm-next';
-      b.className = (A.nextClass || A.btnClass || 'btn') + ' qm-next'; b.textContent = '次の相手をさがす';
+      b.className = (A.nextClass || A.btnClass || 'btn') + ' qm-next'; b.textContent = T('qm_next'); b.setAttribute('data-i', 'qm_next');
       b.onclick = () => QM.next();
       const bf = S.resBefore ? box.querySelector(S.resBefore) : null;
       if (bf) bf.parentNode.insertBefore(b, bf); else box.appendChild(b);

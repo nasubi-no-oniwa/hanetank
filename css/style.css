@@ -350,3 +350,8 @@ body.flip .hud-p.p1 { justify-content: flex-end; }
 body.flip .hud-p.p0 .hud-name { border-left: 0; border-right: 10px solid var(--c0, var(--blue)); }
 body.flip .hud-p.p1 .hud-name { border-right: 0; border-left: 10px solid var(--c1, var(--red)); }
 body.flip .hud-info-row { flex-direction: row-reverse; }
+
+/* ことばの切りかえ */
+.langs{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:14px}
+.langs button{font:800 13px 'M PLUS Rounded 1c',sans-serif;background:transparent;color:#3b2a20;border:2px solid rgba(59,42,32,.45);border-radius:999px;padding:4px 12px;cursor:pointer}
+.langs button[aria-pressed="true"]{background:#3b2a20;color:#fff;border-color:#3b2a20}

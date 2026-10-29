@@ -5,6 +5,7 @@
   'use strict';
   const C = HT.CONFIG, T = HT.TILE, W = C.W, H = C.H;
   const $ = id => document.getElementById(id);
+  const tr = I18N.t;
   const store = {
     get(k, d) { try { const v = localStorage.getItem('ht_' + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
     set(k, v) { try { localStorage.setItem('ht_' + k, JSON.stringify(v)); } catch (e) {} }
@@ -45,7 +46,7 @@
   let R;
   try { R = new HT.Renderer($('view'), autoQuality()); }
   catch (e) {
-    document.body.innerHTML = '<div style="color:#fff;padding:30px;font-size:18px">この端末では3D表示ができませんでした。別のブラウザ（Chrome / Safari）でためしてください。</div>';
+    document.body.innerHTML = '<div style="color:#fff;padding:30px;font-size:18px">' + tr('no3d') + '</div>';
     throw e;
   }
   const input = new HT.Input(R, $('layer'));
@@ -85,11 +86,11 @@
     const el = $('hud-info' + s); if (!el) return;
     if (!sk) { el.innerHTML = ''; el.classList.add('hidden'); return; }
     el.classList.remove('hidden');
-    el.innerHTML = `<span>速さ<b>${sk.speed}</b></span><span>はね<b>${C.BOUNCE_LV[sk.bounce - 1]}回</b></span><span>大きさ<b>${sk.size}</b></span><span>弾<b>${sk.bsize}</b></span><span class="mi" id="hud-mine${s}"></span>`;
+    el.innerHTML = `<span>${tr('hi_speed')}<b>${sk.speed}</b></span><span>${tr('hi_bounce')}<b>${tr('times', { n: C.BOUNCE_LV[sk.bounce - 1] })}</b></span><span>${tr('hi_size')}<b>${sk.size}</b></span><span>${tr('hi_bsize')}<b>${sk.bsize}</b></span><span class="mi" id="hud-mine${s}"></span>`;
   }
   function setMineInfo(s, n, withButton) {
-    const el = $('hud-mine' + s); if (el) el.innerHTML = '地雷<b>' + '●'.repeat(n) + '<i>' + '●'.repeat(C.MAX_MINES - n) + '</i></b>';
-    if (withButton) { const b = $('btn-mine'); b.querySelector('span').innerHTML = '地雷<small>×' + n + '</small>'; b.classList.toggle('empty', n <= 0); }
+    const el = $('hud-mine' + s); if (el) el.innerHTML = tr('mine') + '<b>' + '●'.repeat(n) + '<i>' + '●'.repeat(C.MAX_MINES - n) + '</i></b>';
+    if (withButton) { const b = $('btn-mine'); b.querySelector('span').innerHTML = tr('mine_n', { n }); b.classList.toggle('empty', n <= 0); }
   }
   let vibOn = store.get('vib', true);
   const canVibrate = typeof navigator.vibrate === 'function';
@@ -185,7 +186,7 @@
       R.buildStage(this.view);
       R.setTanks(tankInfo.map((t, s) => t && { slot: s, radius: t.radius, look: t.look, x: t.x, y: t.y }));
       this.done = false;
-      banner(isTouch ? 'リプレイ（タップでとばす）' : 'リプレイ（クリックでとばす）', 'small', 0);
+      banner(tr(isTouch ? 'replay_tap' : 'replay_click'), 'small', 0);
       $('banner').style.top = '12%';
     }
     update(dt) {
@@ -337,8 +338,8 @@
       // サドンデスの知らせ
       const info = sim.suddenInfo();
       if (this.started && !this.result) {
-        if (info.left > 0 && info.left <= 3 && !this.warned) { this.warned = true; banner('サドンデスまで あと少し', 'warn', 1500); HT.Sound.warn(); }
-        if (sim.time >= C.SUDDEN_TIME && !this.suddenShown) { this.suddenShown = true; banner('サドンデス！', 'warn', 1800); HT.Sound.warn(); R.addShake(0.4); }
+        if (info.left > 0 && info.left <= 3 && !this.warned) { this.warned = true; banner(tr('sudden_soon'), 'warn', 1500); HT.Sound.warn(); }
+        if (sim.time >= C.SUDDEN_TIME && !this.suddenShown) { this.suddenShown = true; banner(tr('sudden'), 'warn', 1800); HT.Sound.warn(); R.addShake(0.4); }
       }
       this.updateTimer(info);
 
@@ -364,7 +365,7 @@
       if (info.left > 0) {
         const s = Math.ceil(info.left); el.textContent = Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
         el.classList.remove('sudden'); sub.textContent = '';
-      } else { el.textContent = 'サドンデス'; el.classList.add('sudden'); sub.textContent = '壁がせまってくる！'; }
+      } else { el.textContent = tr('sudden_h'); el.classList.add('sudden'); sub.textContent = tr('walls'); }
     }
     onDie(slot, T) {
       if (this.deaths[slot] != null) return;
@@ -420,10 +421,10 @@
   //  スキルの画面
   // =============================================
   const SKILL_ROWS = [
-    { key: 'speed', name: 'たまの速さ', hint: '上げても下げてもポイントを使う', val: lv => ['とてもおそい', 'おそい', 'ややおそい', 'ふつう', 'ややはやい', 'はやい', 'とてもはやい'][lv - 1], color: '#f59e0b' },
-    { key: 'bounce', name: 'はねかえり', hint: '上げるだけ。1〜2で1回、7で4回', val: lv => C.BOUNCE_LV[lv - 1] + '回', color: '#22c55e' },
-    { key: 'size', name: '戦車の大きさ', hint: '大きくするとポイントがもらえる', val: lv => ['とても小さい', '小さい', 'やや小さい', 'ふつう', 'やや大きい', '大きい', 'とても大きい'][lv - 1], color: '#3b82f6' },
-    { key: 'bsize', name: 'たまの大きさ', hint: '上げても下げてもポイントを使う', val: lv => ['とても小さい', '小さい', 'やや小さい', 'ふつう', 'やや大きい', '大きい', 'とても大きい'][lv - 1], color: '#ef4444' }
+    { key: 'speed', get name() { return tr('sk_speed'); }, get hint() { return tr('hint_cost2'); }, val: lv => tr('sp' + lv), color: '#f59e0b' },
+    { key: 'bounce', get name() { return tr('sk_bounce'); }, get hint() { return tr('hint_bounce'); }, val: lv => tr('times', { n: C.BOUNCE_LV[lv - 1] }), color: '#22c55e' },
+    { key: 'size', get name() { return tr('sk_size'); }, get hint() { return tr('hint_size'); }, val: lv => tr('sz' + lv), color: '#3b82f6' },
+    { key: 'bsize', get name() { return tr('sk_bsize'); }, get hint() { return tr('hint_cost2'); }, val: lv => tr('sz' + lv), color: '#ef4444' }
   ];
   function rowCost(key, lv) {
     if (key === 'speed' || key === 'bsize') return Math.abs(lv - 4);
@@ -484,7 +485,7 @@
         const can = dd => { const nv = lv + dd; if (nv < 1 || nv > 7) return false; return HT.skillCost({ ...this.s, [r.key]: nv }) <= this.o.points; };
         mi.disabled = this.ready || !can(-1); pl.disabled = this.ready || !can(1);
       }
-      const ok = $('sp-ok'); ok.textContent = this.ready ? '準備OK！（取り消す）' : '準備OK'; ok.classList.toggle('done', this.ready);
+      const ok = $('sp-ok'); ok.textContent = this.ready ? tr('ready_undo') : tr('ready'); ok.classList.toggle('done', this.ready);
       $('sp-reset').disabled = this.ready; $('sp-auto').disabled = this.ready;
     },
     setReady(v) { this.ready = v; this.draw(); if (this.o.onReady) this.o.onReady(v, { ...this.s }); },
@@ -536,7 +537,7 @@
       } else {
         if (btn === 2) return;
         let k = this.kind;
-        if (this.count(k) >= this.max(k)) { const other = k === T.HARD ? T.SOFT : T.HARD; if (this.count(other) < this.max(other)) k = other; else { HT.Sound.bad(); toast('もう置けません（さわると取り消し）'); return; } }
+        if (this.count(k) >= this.max(k)) { const other = k === T.HARD ? T.SOFT : T.HARD; if (this.count(other) < this.max(other)) k = other; else { HT.Sound.bad(); toast(tr('no_more')); return; } }
         if (!this.sim.canPlace(this.o.slot, x, y)) { HT.Sound.bad(); this.whyNot(x, y); return; }
         this.list.push({ x, y, k }); this.sim.setTile(x, y, k); R.syncTile(this.sim, x, y, true); HT.Sound.place();
         R.sparks(x + 0.5, 0.8, y + 0.5, 10, [1, 0.95, 0.7], 2.5);
@@ -547,10 +548,10 @@
     },
     whyNot(x, y) {
       if (x < 1 || y < 1 || x > W - 2 || y > H - 2) return;
-      if (this.o.slot === 0 ? x >= W / 2 : x < W / 2) return toast('自分の陣地（色のついた側）にだけ置けます');
-      if (this.sim.tile(x, y) !== T.EMPTY) return toast('そこには置けません');
-      for (const s of HT.SPAWN) if (Math.abs(x + 0.5 - s.x) <= 1.6 && Math.abs(y + 0.5 - s.y) <= 1.6) return toast('スタート地点のそばには置けません');
-      toast('道がふさがるので置けません');
+      if (this.o.slot === 0 ? x >= W / 2 : x < W / 2) return toast(tr('own_side'));
+      if (this.sim.tile(x, y) !== T.EMPTY) return toast(tr('cant_place'));
+      for (const s of HT.SPAWN) if (Math.abs(x + 0.5 - s.x) <= 1.6 && Math.abs(y + 0.5 - s.y) <= 1.6) return toast(tr('near_spawn'));
+      toast(tr('blocks_path'));
     },
     hover(px, py) {
       if (this.ready) { R.setCursor(null); return; }
@@ -566,7 +567,7 @@
         const b = document.querySelector('.btn.kind[data-kind="' + k + '"]');
         b.classList.toggle('sel', this.kind === k); b.classList.toggle('empty', n <= 0);
       }
-      const ok = $('pl-ok'); ok.textContent = this.ready ? '準備OK！' : '準備OK'; ok.classList.toggle('done', this.ready);
+      const ok = $('pl-ok'); ok.textContent = this.ready ? tr('ready_done') : tr('ready'); ok.classList.toggle('done', this.ready);
     },
     setReady(v) { this.ready = v; if (v) R.setCursor(null); this.draw(); if (this.o.onReady) this.o.onReady(v, this.list.slice()); },
     tick(dt) {
@@ -588,7 +589,7 @@
     let h = `<h4><i style="background:${color}"></i>${title}</h4>`;
     for (const r of SKILL_ROWS) {
       const lv = skills[r.key];
-      h += `<div class="st-line"><span>${r.name}</span>${pipbar(lv, r.key === 'bounce' ? 1 : 4, r.color)}<span>${r.key === 'bounce' ? C.BOUNCE_LV[lv - 1] + '回' : 'Lv' + lv}</span></div>`;
+      h += `<div class="st-line"><span>${r.name}</span>${pipbar(lv, r.key === 'bounce' ? 1 : 4, r.color)}<span>${r.key === 'bounce' ? tr('times', { n: C.BOUNCE_LV[lv - 1] }) : 'Lv' + lv}</span></div>`;
     }
     return h;
   }
@@ -650,7 +651,7 @@
       this.order = shuffle([0, 1, 2]);
       this.looks = mode === 'cpu' ? pairLooks(look1, { c: look1.c === 1 ? 0 : 1, p: 0 }) : pairLooks(look1, look2);
       setSideColors(this.looks);
-      this.names = mode === 'cpu' ? ['あなた', 'CPU（' + { easy: 'よわい', normal: 'ふつう', hard: 'つよい' }[level] + '）'] : ['1P', '2P'];
+      this.names = mode === 'cpu' ? [tr('you'), tr('cpu_lv', { lv: tr(level) })] : ['1P', '2P'];
       setNames(...this.names);
       input.setMode(mode === 'local2' ? 'local2' : 'single');
       document.body.classList.toggle('can-stamp', mode === 'cpu');
@@ -673,24 +674,24 @@
     curtain(turn, next) {
       this.phase = 'curtain';
       R.clearDynamic(); R.buildStage(new HT.Sim(this.stage)); R.setTanks([]);
-      $('cu-title').textContent = (turn === 0 ? '1P' : '2P') + 'の番です';
+      $('cu-title').textContent = tr('p_turn', { p: turn === 0 ? '1P' : '2P' });
       $('cu-note').textContent = next === 'skill'
-        ? (turn === 0 ? '2Pは画面を見ないでね（スキルをふります）' : '1Pは画面を見ないでね（スキルをふります）')
-        : (turn === 0 ? '2Pは画面を見ないでね（ブロックを置きます）' : '1Pは画面を見ないでね（ブロックを置きます）');
+        ? tr('dont_look_skill', { p: turn === 0 ? '2P' : '1P' })
+        : tr('dont_look_block', { p: turn === 0 ? '2P' : '1P' });
       $('cu-ok').onclick = () => { if (next === 'skill') this.openSkill(turn); else this.openPlace(turn); };
       show('curtain');
     }
-    stageTitle() { return this.n + '戦目・ステージ：' + HT.STAGES[this.stage].name + '（' + this.points + 'pt）'; }
+    stageTitle() { return tr('stage_title', { n: this.n, st: tr('stage' + this.stage), pt: this.points }); }
     openSkill(turn) {
       this.phase = 'skill'; this.turn = turn;
       this.deadline = performance.now() + C.SKILL_TIME * 1000;
       R.clearDynamic(); R.buildStage(new HT.Sim(this.stage)); R.setTanks([]);
       SkillUI.open({
         points: this.points, skills: this.skills[turn],
-        title: this.mode === 'local2' ? (turn === 0 ? '1P' : '2P') + 'のスキル' : 'スキルをふろう',
+        title: this.mode === 'local2' ? tr('p_skill', { p: turn === 0 ? '1P' : '2P' }) : tr('skill_title'),
         sub: this.stageTitle(),
         deadline: () => (this.deadline - performance.now()) / 1000,
-        oppText: () => (this.mode === 'cpu' ? 'CPU：準備OK' : ''),
+        oppText: () => (this.mode === 'cpu' ? tr('cpu_ready') : ''),
         onChange: s => { this.skills[turn] = s; },
         onReady: (v, s) => { this.skills[turn] = s; if (v) this.skillDone(); }
       });
@@ -708,9 +709,9 @@
       const st = HT.statsFrom(this.skills[turn]);
       PlaceUI.open({
         stage: this.stage, slot: turn, look: toLook(this.looks[turn]), radius: st.radius, blocks: this.blocks[turn],
-        title: this.mode === 'local2' ? (turn === 0 ? '1P' : '2P') + 'のブロック' : 'ブロックを置こう',
+        title: this.mode === 'local2' ? tr('p_block', { p: turn === 0 ? '1P' : '2P' }) : tr('place_title'),
         deadline: () => (this.deadline - performance.now()) / 1000,
-        oppText: () => (this.mode === 'cpu' ? 'CPU：準備OK' : ''),
+        oppText: () => (this.mode === 'cpu' ? tr('cpu_ready') : ''),
         onChange: l => { this.blocks[turn] = l; },
         onReady: (v, l) => { this.blocks[turn] = l; if (v) this.placeDone(); }
       });
@@ -731,7 +732,7 @@
         levels: [this.level, this.level], goIn: again ? 2.6 : 3.4,
         onEnd: r => this.battleEnd(r)
       });
-      if (again) banner('ひきわけ！ もう一回', '', 1600);
+      if (again) banner(tr('draw_again'), '', 1600);
     }
     battleEnd(r) {
       const b = this.b;
@@ -747,16 +748,16 @@
       if (over && cpu) {
         const rec = store.get('rec_cpu', {}); const k = this.level; rec[k] = rec[k] || { w: 0, l: 0 };
         rec[k][youWin ? 'w' : 'l']++; store.set('rec_cpu', rec);
-        record = this.names[1] + 'との通算：' + rec[k].w + '勝 ' + rec[k].l + '敗';
+        record = tr('record', { name: this.names[1], w: rec[k].w, l: rec[k].l });
       }
-      const title = cpu ? (over ? (youWin ? 'あなたの勝ち！' : 'CPUの勝ち…') : (youWin ? 'かち！' : 'まけ…')) : (over ? (r.winner === 0 ? '1P' : '2P') + 'の勝ち！' : (r.winner === 0 ? '1P' : '2P') + 'のかち！');
+      const title = cpu ? (over ? (youWin ? tr('you_win') : tr('cpu_win')) : (youWin ? tr('round_win') : tr('round_lose'))) : (over ? tr('x_win', { p: r.winner === 0 ? '1P' : '2P' }) : tr('x_round', { p: r.winner === 0 ? '1P' : '2P' }));
       const cards = cpu
-        ? [{ title: 'あいて（CPU）の戦車', color: COLORS[this.looks[1].c], skills: this.skills[1] }, { title: 'あなたの戦車', color: COLORS[this.looks[0].c], skills: this.skills[0] }]
-        : [{ title: '1Pの戦車', color: COLORS[this.looks[0].c], skills: this.skills[0] }, { title: '2Pの戦車', color: COLORS[this.looks[1].c], skills: this.skills[1] }];
+        ? [{ title: tr('opp_cpu_tank'), color: COLORS[this.looks[1].c], skills: this.skills[1] }, { title: tr('your_tank'), color: COLORS[this.looks[0].c], skills: this.skills[0] }]
+        : [{ title: tr('p_tank', { p: '1P' }), color: COLORS[this.looks[0].c], skills: this.skills[0] }, { title: tr('p_tank', { p: '2P' }), color: COLORS[this.looks[1].c], skills: this.skills[1] }];
       const showIt = () => ResultUI.show({
         title, cls: cpu ? (youWin ? 'win' : 'lose') : 'win', wins: this.wins, cards, record,
         replay: () => this.replay(),
-        next: over ? { text: 'もう一回', fn: () => setGame(new LocalMatch(this.mode, this.level)) } : { text: 'つぎへ（' + (this.n + 1) + '戦目）', fn: () => this.nextBattle() },
+        next: over ? { text: tr('again'), fn: () => setGame(new LocalMatch(this.mode, this.level)) } : { text: tr('next_n', { n: this.n + 1 }), fn: () => this.nextBattle() },
         toTitle: over ? () => goTitle() : null
       });
       this.showResult = showIt;
@@ -804,9 +805,9 @@
       this.build();
       this.buildPanel();
       show('practice'); hud(true); document.body.classList.add('prac');
-      setNames('あなた', 'まと'); setPips([0, 0]);
+      setNames(tr('you'), tr('target')); setPips([0, 0]);
       $('pips0').innerHTML = ''; $('pips1').innerHTML = '';
-      $('hud-timer').textContent = 'れんしゅう'; $('hud-sub').textContent = '';
+      $('hud-timer').textContent = tr('practice'); $('hud-sub').textContent = '';
       this.hits = 0;
     }
     build() {
@@ -848,13 +849,13 @@
       }
       const st = $('pr-stages'); st.innerHTML = '';
       HT.STAGES.forEach((s, i) => {
-        const b = document.createElement('button'); b.className = 'btn mini ghost'; b.textContent = s.name;
+        const b = document.createElement('button'); b.className = 'btn mini ghost'; b.textContent = tr('stage' + i);
         b.onclick = () => { this.stage = i; this.build(); this.drawPanel(); };
         st.appendChild(b);
       });
       $('pr-quit').onclick = () => goTitle();
-      $('pr-fold').onclick = () => { const body = $('pr-body'); body.classList.toggle('hidden'); $('pr-fold').textContent = body.classList.contains('hidden') ? 'ひらく' : 'たたむ'; };
-      if (isTouch) { $('pr-body').classList.add('hidden'); $('pr-fold').textContent = 'ひらく'; }
+      $('pr-fold').onclick = () => { const body = $('pr-body'); body.classList.toggle('hidden'); $('pr-fold').textContent = body.classList.contains('hidden') ? tr('unfold') : tr('fold'); };
+      if (isTouch) { $('pr-body').classList.add('hidden'); $('pr-fold').textContent = tr('unfold'); }
       this.drawPanel();
     }
     drawPanel() {
@@ -905,7 +906,7 @@
         this.myRespawn += dt;
         if (this.myRespawn > 1.5) { this.myRespawn = 0; const sp = HT.SPAWN[0]; me.x = sp.x; me.y = sp.y; me.alive = true; R.setTanks(sim.tanks.map((tk, s) => ({ slot: s, radius: tk.radius, look: this.looks[s], x: tk.x, y: tk.y }))); }
       }
-      $('hud-sub').textContent = 'あてた数 ' + this.hits;
+      $('hud-sub').textContent = tr('hits', { n: this.hits });
       // 練習ではサドンデスなし
       const guides = []; if (me.alive) {
         const off = me.radius + me.bradius + 0.06;
@@ -959,7 +960,7 @@
         b.onclick = () => this.setLook({ ...L, p: i });
         ps.appendChild(b);
       });
-      $('cu-note2').textContent = this.who === 1 ? '同じPCで2人で遊ぶときの2Pの戦車です。1Pと同じ色にすると、2Pは別の色になります。' : '';
+      $('cu-note2').textContent = this.who === 1 ? tr('p2_note') : '';
     }
     update(dt) {
       this.t += dt;
@@ -1010,7 +1011,7 @@
         onState: (s, st) => { if (this.b && st.k === this.key) this.b.pushRemote(s, st); },
         onEvent: (s, e) => this.onEvent(s, e),
         onStamp: (s, k) => stampBubble(s, k),
-        onOppWait: v => { if (v) banner('相手の通信を待っています…', 'warn small', 0); else hideBanner(); },
+        onOppWait: v => { if (v) banner(tr('opp_wait'), 'warn small', 0); else hideBanner(); },
         onRejoined: () => this.rejoined(),
         onOppLeft: () => this.oppLeft(),
         onKicked: () => this.kicked()
@@ -1041,16 +1042,16 @@
         if (!both) {
           $('wait-code').textContent = this.room.code;
           hideBanner();
-          $('wait-note').textContent = this.watch ? '対戦する2人がそろうのを待っています（観戦）' : '招待リンクを送るか、相手に同じあいことばを入れてもらってね';
+          $('wait-note').textContent = this.watch ? tr('watch_wait') : tr('invite_note');
           show('wait');
         }
       }
       const looks = this.looksNow(); setSideColors(looks);
-      const meName = s => (s === this.me ? this.nameOf(s) + '（あなた）' : this.nameOf(s));
+      const meName = s => (s === this.me ? tr('you_tag', { name: this.nameOf(s) }) : this.nameOf(s));
       setNames(meName(0), meName(1));
       const nb = $('net-badge');
       nb.classList.toggle('hidden', false);
-      nb.textContent = (this.watch ? '観戦中・' : '') + (p.p2p ? '直接つながっています' : 'サーバー経由') + (p.watchers ? '・観戦 ' + p.watchers + '人' : '');
+      nb.textContent = (this.watch ? tr('watching_') : '') + tr(p.p2p ? 'p2p' : 'server') + (p.watchers ? tr('n_watch', { n: p.watchers }) : '');
     }
     myPick() { return this.room.picks[this.me]; }
     oppPick() { return this.room.picks[this.oppSlot()]; }
@@ -1061,7 +1062,7 @@
       const g = this.g; if (!g) return '';
       const op = this.oppPick();
       const ok = op && op.mk === this.pickKey(g) && (kind === 'skill' ? op.ok : op.ok2);
-      return '相手：' + (ok ? '準備OK' : 'えらんでいます…');
+      return tr('opp_state', { s: ok ? tr('ready') : tr('choosing') });
     }
     writePick(extra) {
       if (this.watch || !this.g) return;
@@ -1161,16 +1162,16 @@
         this.enterResult(g, true);
       }
     }
-    titleSub(g) { return g.n + '戦目・ステージ：' + HT.STAGES[g.st].name + '（' + C.SKILL_POINTS[Math.min(g.n - 1, 2)] + 'pt）'; }
+    titleSub(g) { return tr('stage_title', { n: g.n, st: tr('stage' + g.st), pt: C.SKILL_POINTS[Math.min(g.n - 1, 2)] }); }
     enterSkill(g) {
       this.stopReplay();
       this.phase = 'skill'; this.b = null; hud(false);
       this.skills = HT.defaultSkills(); this.blocks = [];
       R.clearDynamic(); R.buildStage(new HT.Sim(g.st)); R.setTanks([]);
-      if (this.watch) { this.watchScreen('スキルをえらんでいます…', g); return; }
+      if (this.watch) { this.watchScreen(tr('w_skill'), g); return; }
       this.writePick({ ok: 0, ok2: 0 });
       SkillUI.open({
-        points: C.SKILL_POINTS[Math.min(g.n - 1, 2)], skills: this.skills, title: 'スキルをふろう', sub: this.titleSub(g),
+        points: C.SKILL_POINTS[Math.min(g.n - 1, 2)], skills: this.skills, title: tr('skill_title'), sub: this.titleSub(g),
         deadline: () => (g.end - 600 - this.clock()) / 1000,
         oppText: () => this.oppText('skill'),
         onChange: s => { this.skills = s; this.debouncePick(); },
@@ -1181,13 +1182,13 @@
     enterPlace(g) {
       this.stopReplay();
       this.phase = 'place'; hud(false);
-      if (this.watch) { this.watchScreen('ブロックを置いています…', g); return; }
+      if (this.watch) { this.watchScreen(tr('w_block'), g); return; }
       if (current === 'skill') this.skills = { ...SkillUI.s };
       this.writePick({ ok: 1 });
       const st = HT.statsFrom(this.skills);
       PlaceUI.open({
         stage: g.st, slot: this.me, look: toLook(this.looksNow()[this.me]), radius: st.radius, blocks: [],
-        title: 'ブロックを置こう', deadline: () => (g.end - 600 - this.clock()) / 1000,
+        title: tr('place_title'), deadline: () => (g.end - 600 - this.clock()) / 1000,
         oppText: () => this.oppText('place'),
         onChange: l => { this.blocks = l; this.debouncePick(); },
         onReady: (v, l) => { this.blocks = l; this.writePick({ ok2: v ? 1 : 0 }); }
@@ -1195,7 +1196,7 @@
     }
     watchScreen(text, g) {
       show(null); hud(true); setPips(g.w || [0, 0]);
-      $('hud-timer').textContent = g.n + '戦目'; $('hud-sub').textContent = HT.STAGES[g.st].name;
+      $('hud-timer').textContent = tr('battle_n', { n: g.n }); $('hud-sub').textContent = tr('stage' + g.st);
       banner(text, '', 0);
     }
     enterBattle(g, key) {
@@ -1217,7 +1218,7 @@
         onEnd: () => {}
       });
       this.b.key = key;
-      if (g.draw && g.tr) banner('ひきわけ！ もう一回', '', 1800);
+      if (g.draw && g.tr) banner(tr('draw_again'), '', 1800);
       this.lastSend = 0;
     }
     localEvent(e, sim) {
@@ -1262,7 +1263,7 @@
       this.room.sendStamp(k);
     }
     rejoined() {
-      toast('通信が戻りました');
+      toast(tr('back_online'));
       if (this.phase === 'skill') this.writePick({ ok: SkillUI.ready ? 1 : 0, ok2: 0 });
       else if (this.phase === 'place') this.writePick({ ok: 1, ok2: PlaceUI.ready ? 1 : 0 });
       else if (this.pressed) this.room.setReady(this.pressed);
@@ -1287,28 +1288,28 @@
       const sk = this.battleSkills || [HT.defaultSkills(), HT.defaultSkills()];
       let title, cls, cards, record = '';
       if (this.watch) {
-        title = (final ? this.nameOf(g.res) + ' の勝ち！' : this.nameOf(g.res) + ' のかち'); cls = 'win';
+        title = (final ? tr('x_final', { name: this.nameOf(g.res) }) : tr('x_round2', { name: this.nameOf(g.res) })); cls = 'win';
         cards = [{ title: this.nameOf(0), color: COLORS[looks[0].c], skills: sk[0] }, { title: this.nameOf(1), color: COLORS[looks[1].c], skills: sk[1] }];
       } else {
-        title = final ? (won ? 'あなたの勝ち！' : 'あいての勝ち…') : (won ? 'かち！' : 'まけ…'); cls = won ? 'win' : 'lose';
-        cards = [{ title: 'あいて（' + this.nameOf(op) + '）の戦車', color: COLORS[looks[op].c], skills: sk[op] }, { title: 'あなたの戦車', color: COLORS[looks[me].c], skills: sk[me] }];
+        title = final ? (won ? tr('you_win') : tr('opp_win')) : (won ? tr('round_win') : tr('round_lose')); cls = won ? 'win' : 'lose';
+        cards = [{ title: tr('opp_tank', { name: this.nameOf(op) }), color: COLORS[looks[op].c], skills: sk[op] }, { title: tr('your_tank'), color: COLORS[looks[me].c], skills: sk[me] }];
         if (!this.soundDone || this.soundDone !== g.m + '_' + g.n) { this.soundDone = g.m + '_' + g.n; (won ? HT.Sound.win : HT.Sound.lose)(); }
         if (final) record = this.record(won, g);
       }
       setPips(g.w);
       const wins = this.watch ? g.w : [g.w[0], g.w[1]];
       const nextBtn = this.watch ? null : final
-        ? { text: 'もう一回', fn: btn => { this.pressed = 'ag' + g.m; this.room.setReady(this.pressed); btn.classList.add('waiting'); btn.textContent = '相手を待っています…'; } }
-        : { text: 'つぎへ（' + (g.n + 1) + '戦目）', fn: btn => { this.pressed = 'nx' + this.pickKey(g); this.room.setReady(this.pressed); btn.classList.add('waiting'); btn.textContent = '相手を待っています…'; } };
+        ? { text: tr('again'), fn: btn => { this.pressed = 'ag' + g.m; this.room.setReady(this.pressed); btn.classList.add('waiting'); btn.textContent = tr('waiting_opp'); } }
+        : { text: tr('next_n', { n: g.n + 1 }), fn: btn => { this.pressed = 'nx' + this.pickKey(g); this.room.setReady(this.pressed); btn.classList.add('waiting'); btn.textContent = tr('waiting_opp'); } };
       ResultUI.show({
         title, cls, wins, cards, record, next: nextBtn,
         replay: b => this.replay(g, final),
         toTitle: final || this.watch ? () => goTitle() : null,
-        note: final ? '' : (this.watch ? '' : '20秒たつと自動で次へ進みます')
+        note: final ? '' : (this.watch ? '' : tr('auto_next'))
       });
       $('res-score').innerHTML = `<span class="s0">${g.w[0]}</span> - <span class="s1">${g.w[1]}</span>`;
       const want = final ? 'ag' + g.m : 'nx' + this.pickKey(g);
-      if (this.pressed === want) { const nx = $('res-next'); nx.classList.add('waiting'); nx.textContent = '相手を待っています…'; }
+      if (this.pressed === want) { const nx = $('res-next'); nx.classList.add('waiting'); nx.textContent = tr('waiting_opp'); }
     }
     record(won, g) {
       const op = this.room.players[this.oppSlot()];
@@ -1316,7 +1317,7 @@
       const rec = store.get('rec', {}); const k = op.pid || 'x';
       rec[k] = rec[k] || { w: 0, l: 0 };
       if (this.recorded !== g.m) { this.recorded = g.m; rec[k][won ? 'w' : 'l']++; rec[k].n = op.name; store.set('rec', rec); }
-      return op.name + ' との通算：' + rec[k].w + '勝 ' + rec[k].l + '敗';
+      return tr('record', { name: op.name, w: rec[k].w, l: rec[k].l });
     }
     replay(g, final, auto) {
       const b = this.b; if (!b || !b.clip) return;
@@ -1326,18 +1327,18 @@
     oppLeft() {
       if (this.watch || this.room.left) return;
       if (!this.g || this.g.ph === 'lobby' || this.phase === 'wait' || this.phase === 'lobby') return;
-      if (this.phase === 'final') { toast('相手が抜けました'); return; }
+      if (this.phase === 'final') { toast(tr('opp_left_t')); return; }
       PlaceUI.close(); this.stopReplay(); hideBanner();
       this.phase = 'left'; this.b && !this.b.result && (this.b.result = { winner: this.me });
       const op = this.room.players[this.oppSlot()];
       HT.Sound.win();
-      ResultUI.show({ title: 'あなたの勝ち！', cls: 'win', wins: null, cards: [], record: '', note: QM.isRandom() ? '相手が抜けたので、あなたの勝ちです。' : '相手がいなくなったので、あなたの勝ちです。このまま待つと、同じあいことばで入ってきた人と対戦できます。', next: null, replay: null, toTitle: () => goTitle() });
+      ResultUI.show({ title: tr('you_win'), cls: 'win', wins: null, cards: [], record: '', note: QM.isRandom() ? tr('left_win_rand') : tr('left_win_code'), next: null, replay: null, toTitle: () => goTitle() });
       if (this.me === 0) this.room.setGame({ ph: 'lobby', m: ((this.g && this.g.m) || 0) + 1 });
     }
     kicked() {
       if (this.phase === 'kicked') return;
       this.phase = 'kicked'; PlaceUI.close(); this.stopReplay(); hud(false); this.room.leave();
-      ResultUI.show({ title: '通信が切れました', cls: 'draw', wins: null, cards: [], record: '', note: '通信が切れたため、対戦から外れました。もう一度あいことばを入れて入り直してください。', next: null, replay: null, toTitle: () => goTitle() });
+      ResultUI.show({ title: tr('disc'), cls: 'draw', wins: null, cards: [], record: '', note: tr('disc_note'), next: null, replay: null, toTitle: () => goTitle() });
     }
     update(dt) {
       if (this.phase === 'kicked') { R.sync({ tanks: [], bullets: [], mines: [], time: 0, warnRing: 0 }, dt); return; }
@@ -1373,7 +1374,7 @@
     show('title');
   }
   function startLocal(mode, level) {
-    if (mode === 'local2' && isTouch && !(navigator.getGamepads && Array.from(navigator.getGamepads()).filter(Boolean).length)) toast('ふたりで遊ぶにはキーボードかコントローラーが必要です', 3200);
+    if (mode === 'local2' && isTouch && !(navigator.getGamepads && Array.from(navigator.getGamepads()).filter(Boolean).length)) toast(tr('need_kb'), 3200);
     hud(false);
     setGame(new LocalMatch(mode, level));
     tryFullscreen();
@@ -1396,21 +1397,21 @@
   async function joinOnline(watch) {
     const name = $('in-name').value.trim(), code = HT.cleanCode($('in-code').value);
     const err = $('online-err');
-    if (!code) { err.textContent = 'あいことばを入れてください'; return; }
+    if (!code) { err.textContent = tr('err_code_short'); return; }
     store.set('name', name); store.set('code', code);
-    err.textContent = 'つないでいます…';
+    err.textContent = tr('connecting');
     $('btn-join').disabled = $('btn-watch').disabled = true;
     try {
       const db = await Promise.race([getDB(), new Promise((_, ng) => setTimeout(() => ng(new Error('timeout')), 12000))]);
       const room = new HT.Room(db, code, name, { pid, look: lookStr(look1), watch }, {});
       await Promise.race([room.join(), new Promise((_, ng) => setTimeout(() => ng(new Error('timeout')), 12000))]);
       err.textContent = '';
-      if (room.slot < 0 && !watch) toast('2人そろっているので観戦します');
+      if (room.slot < 0 && !watch) toast(tr('full_watch'));
       setGame(new OnlineMatch(room));
       tryFullscreen();
     } catch (e) {
       console.error(e);
-      err.textContent = 'つながりませんでした。通信を確認して、もう一度ためしてください。';
+      err.textContent = tr('conn_fail');
     } finally { $('btn-join').disabled = $('btn-watch').disabled = false; }
   }
   $('btn-join').onclick = () => joinOnline(false);
@@ -1425,7 +1426,7 @@
       $('in-name').value = name; $('in-code').value = code; joinOnline(false);
       setTimeout(() => { store.set('code', keepC); store.set('name', keepN || name); }, 60);
     },
-    cpu: () => startLocal('cpu', 'normal'), cpuLabel: 'CPU（ふつう）と遊びながら待つ',
+    cpu: () => startLocal('cpu', 'normal'), cpuLabel: () => tr('cpu_wait_label'),
     quit: () => goTitle(),
     colors: { main: '#e2553f', alt: '#4f5bd5', bg: 'var(--cream)', fg: 'var(--ink)' },
   });
@@ -1439,19 +1440,19 @@
   }
   $('btn-copy').onclick = () => {
     const code = $('wait-code').textContent, url = inviteUrl(code);
-    const text = 'ハネタンクで対戦しよう！ あいことば：' + code;
-    if (navigator.share) { navigator.share({ title: 'ハネタンク', text, url }).catch(() => {}); return; }
-    (navigator.clipboard ? navigator.clipboard.writeText(text + '\n' + url) : Promise.reject()).then(() => toast('招待リンクをコピーしました。LINEなどに貼って送ってね')).catch(() => toast(url, 5000));
+    const text = tr('share_text', { code });
+    if (navigator.share) { navigator.share({ title: tr('doc_title'), text, url }).catch(() => {}); return; }
+    (navigator.clipboard ? navigator.clipboard.writeText(text + '\n' + url) : Promise.reject()).then(() => toast(tr('link_copied'))).catch(() => toast(url, 5000));
   };
 
   // メニュー
-  const QNAMES = { auto: 'じどう', high: '高', mid: '中', low: '低' };
+  const QNAMES = { get auto() { return tr('q_auto'); }, get high() { return tr('q_high'); }, get mid() { return tr('q_mid'); }, get low() { return tr('q_low'); } };
   function drawMenu() {
-    $('mn-sound').textContent = '音：' + (HT.Sound.on ? 'オン' : 'オフ');
-    $('mn-quality').textContent = '画質：' + QNAMES[qSetting];
-    $('mn-vib').textContent = '振動：' + (vibOn ? 'オン' : 'オフ');
+    $('mn-sound').textContent = tr(HT.Sound.on ? 'sound_on' : 'sound_off');
+    $('mn-quality').textContent = tr('quality', { q: QNAMES[qSetting] });
+    $('mn-vib').textContent = tr(vibOn ? 'vib_on' : 'vib_off');
     $('mn-vib').classList.toggle('hidden', !canVibrate);
-    $('mn-quit').textContent = game instanceof OnlineMatch ? '対戦をぬける' : 'タイトルへ';
+    $('mn-quit').textContent = game instanceof OnlineMatch ? tr('leave_match') : tr('to_title');
   }
   let menuReturn = null;
   $('btn-menu').onclick = () => {
@@ -1490,7 +1491,7 @@
       if (fpsT > 3) {
         const fps = fpsN / fpsAcc; fpsAcc = 0; fpsN = 0; fpsT = 0;
         if (fps < 40) lowStreak++; else lowStreak = 0;
-        if (lowStreak >= 1 && R.qName !== 'low') { R.setQuality(R.qName === 'high' ? 'mid' : 'low'); lowStreak = 0; toast('なめらかに動くよう画質を下げました'); }
+        if (lowStreak >= 1 && R.qName !== 'low') { R.setQuality(R.qName === 'high' ? 'mid' : 'low'); lowStreak = 0; toast(tr('lowered_q')); }
       }
     }
   }
@@ -1502,7 +1503,7 @@
     if (room && HT.cleanCode(room)) {
       $('btn-online').onclick();
       $('in-code').value = HT.cleanCode(room);
-      toast('招待されました！なまえを入れて「対戦する」を押してね', 4000);
+      toast(tr('invited'), 4000);
     }
   } catch (e) {}
 
