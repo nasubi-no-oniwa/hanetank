@@ -24,6 +24,14 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=M+PLUS+Rounded+1c:wght@500;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
+<!-- nasubi-track: 結果画面とXへの投稿の回数を記録（ゲームの動きには影響しない） -->
+<script>(function(){try{var G="hanetank",IDS=["result"];
+function ev(n){try{if(typeof gtag==='function')gtag('event',n,{game:G});}catch(e){}}
+var o=window.open;window.open=function(u){try{if(/intent\/(post|tweet)/.test(String(u)))ev('x_share');}catch(e){}return o.apply(window,arguments);};
+if(!IDS.length)return;
+function vis(e){if(!e||!e.isConnected||e.closest('[hidden]'))return false;var r=e.getBoundingClientRect();if(r.width<1||r.height<1)return false;for(var n=e;n&&n.nodeType===1;n=n.parentElement){var s=getComputedStyle(n);if(s.display==='none'||s.visibility==='hidden'||parseFloat(s.opacity)<0.05)return false;}return true;}
+var was={};setInterval(function(){try{var any=false;for(var i=0;i<IDS.length;i++){if(vis(document.getElementById(IDS[i])))any=true;}if(any&&!was.v)ev('result_view');was.v=any;}catch(e){}},700);
+}catch(e){}})();</script>
 </head>
 <body>
 <canvas id="view"></canvas>
