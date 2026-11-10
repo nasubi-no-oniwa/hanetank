@@ -32,6 +32,18 @@ if(!IDS.length)return;
 function vis(e){if(!e||!e.isConnected||e.closest('[hidden]'))return false;var r=e.getBoundingClientRect();if(r.width<1||r.height<1)return false;for(var n=e;n&&n.nodeType===1;n=n.parentElement){var s=getComputedStyle(n);if(s.display==='none'||s.visibility==='hidden'||parseFloat(s.opacity)<0.05)return false;}return true;}
 var was={};setInterval(function(){try{var any=false;for(var i=0;i<IDS.length;i++){if(vis(document.getElementById(IDS[i])))any=true;}if(any&&!was.v)ev('result_view');was.v=any;}catch(e){}},700);
 }catch(e){}})();</script>
+<!-- nasubi-ad: 結果画面のいちばん下に広告の帯を1つだけ出す（遊んでいる最中は出さない・ボタンに重ねない） -->
+<script>(function(){try{var IDS=["result"],AD='https://nasubi-no-oniwa.github.io/ad/';
+if(/[?&]noad=1/.test(location.search))return;var T=/[?&]adtest=1/.test(location.search);
+var ifr=null,boxes={};
+function vis(e){if(!e||!e.isConnected||e.closest('[hidden]'))return false;var r=e.getBoundingClientRect();if(r.width<1||r.height<1)return false;for(var n=e;n&&n.nodeType===1;n=n.parentElement){var s=getComputedStyle(n);if(s.display==='none'||s.visibility==='hidden'||parseFloat(s.opacity)<0.05)return false;}return true;}
+function el(sp){var q=sp.split('@'),e=document.getElementById(q[0]);return e&&q[1]?e.closest(q[1]):e;}
+function box(id){var b=boxes[id];if(!b){b=document.createElement('div');b.className='nsb-ad';b.style.cssText='display:block;width:320px;max-width:100%;height:50px;margin:12px auto 0;overflow:hidden;flex:0 0 auto;'+(T?'background:#ccc;outline:1px dashed #888;':'');boxes[id]=b;}return b;}
+function place(){for(var i=0;i<IDS.length;i++){var e=el(IDS[i]);if(e&&box(IDS[i]).parentNode!==e)e.appendChild(box(IDS[i]));}}
+function tick(){try{place();for(var i=0;i<IDS.length;i++){var e=el(IDS[i]);if(vis(e)){var b=box(IDS[i]);if(!ifr){ifr=document.createElement('iframe');ifr.title='ad';ifr.setAttribute('scrolling','no');ifr.width=320;ifr.height=50;ifr.style.cssText='border:0;width:320px;height:50px;display:block;max-width:100%';ifr.src=AD;}if(ifr.parentNode!==b)b.appendChild(ifr);return;}}}catch(_){}}
+function go(){place();try{new MutationObserver(place).observe(document.body,{childList:true,subtree:true});}catch(_){}setInterval(tick,700);}
+if(document.body)go();else document.addEventListener('DOMContentLoaded',go);
+}catch(e){}})();</script>
 </head>
 <body>
 <canvas id="view"></canvas>
