@@ -32,8 +32,8 @@ if(!IDS.length)return;
 function vis(e){if(!e||!e.isConnected||e.closest('[hidden]'))return false;var r=e.getBoundingClientRect();if(r.width<1||r.height<1)return false;for(var n=e;n&&n.nodeType===1;n=n.parentElement){var s=getComputedStyle(n);if(s.display==='none'||s.visibility==='hidden'||parseFloat(s.opacity)<0.05)return false;}return true;}
 var was={};setInterval(function(){try{var any=false;for(var i=0;i<IDS.length;i++){if(vis(document.getElementById(IDS[i])))any=true;}if(any&&!was.v)ev('result_view');was.v=any;}catch(e){}},700);
 }catch(e){}})();</script>
-<!-- nasubi-ad: スマホのとき、結果画面とタイトル画面の決めた場所に広告の帯（と、決めた場所だけその下に大きい広告）を出す（遊んでいる最中は出さない・ボタンに重ねない・広告の幅320pxを切らない・画面が出たらすぐ見せるが、最初の1.2秒は押しても反応しない・画面が出るたびに新しい広告を読みこむ（場所ごとに10秒に1回まで）・画面が隠れて2秒たったら広告を外して止める） -->
-<script>(function(){try{var C=[{"a": "#result .result-box", "v": "#result"}, {"a": "#title div.logo-box", "v": "#title", "t": 1, "b": 0, "m": 20, "x": "", "x2": ""}],BIG=1,M=20,EX="",EX2="",AD='https://nasubi-no-oniwa.github.io/ad/',AD2='https://nasubi-no-oniwa.github.io/ad/big.html',LOCK=1200,HOLD=2000,MIN=10000;
+<!-- nasubi-ad: スマホのとき、結果画面とタイトル画面の決めた場所に広告の帯（と、決めた場所だけその下に大きい広告）を出す（遊んでいる最中は出さない・ボタンに重ねない・広告の幅320pxを切らない・画面が出たらすぐ見せるが、最初の1.2秒は押しても反応しない・画面が出るたびに新しい広告を読みこむ（場所ごとに10秒に1回まで）・画面が隠れて2秒たったら広告を外して止める・タイトル画面はタイトル用の広告枠を使う） -->
+<script>(function(){try{var C=[{"a": "#result .result-box", "v": "#result"}, {"a": "#title div.logo-box", "v": "#title", "t": 1, "b": 0, "m": 20, "x": "", "x2": ""}],BIG=1,M=20,EX="",EX2="",AD='https://nasubi-no-oniwa.github.io/ad/',AD2='https://nasubi-no-oniwa.github.io/ad/big.html',TAD='https://nasubi-no-oniwa.github.io/ad/t.html',TAD2='https://nasubi-no-oniwa.github.io/ad/tbig.html',LOCK=1200,HOLD=2000,MIN=10000;
 if(/[?&]noad=1/.test(location.search))return;
 if(!/iPhone|iPod|Android|Mobile|Windows Phone|BlackBerry/i.test(navigator.userAgent||''))return;
 var S=[];
@@ -57,7 +57,7 @@ if(i!==k){if(s.on)off(s,now);if(s.f&&now-s.hid>=HOLD&&now-s.last>=MIN)kill(s);}}
 if(k<0)return;
 s=S[k];
 if(!s.on){s.on=true;s.since=now;}
-if(!s.f){s.f=mkf(AD,320,50);s.b.appendChild(s.f);if(s.g){s.f2=mkf(AD2,300,250);s.g.appendChild(s.f2);}s.last=now;}
+if(!s.f){var t=!!C[k].t;s.f=mkf(t?TAD:AD,320,50);s.b.appendChild(s.f);if(s.g){s.f2=mkf(t?TAD2:AD2,300,250);s.g.appendChild(s.f2);}s.last=now;}
 if(s.f.parentNode!==s.b)s.b.appendChild(s.f);if(s.f2&&s.f2.parentNode!==s.g)s.g.appendChild(s.f2);
 var pe=(now-s.since<LOCK)?'none':'auto';
 s.f.style.visibility='visible';s.f.style.pointerEvents=pe;if(s.f2){s.f2.style.visibility='visible';s.f2.style.pointerEvents=pe;}
