@@ -1,6 +1,13 @@
 // =============================================
 //  ハネタンク  画面と試合の進行
 // =============================================
+
+// Xの投稿で引用するツイート（なすびのお庭の管理ページ quote/ で日本語・英語を貼りかえられる）
+var NQ=window.__nq||(window.__nq={q:{}});if(!NQ.f){NQ.f=1;fetch('https://ft-red-default-rtdb.asia-southeast1.firebasedatabase.app/xquote/g/hanetank.json').then(r=>r.json()).then(d=>{if(d&&typeof d==='object')NQ.q=d;}).catch(()=>{});}
+function quoteURL(){let l='';try{if(typeof lang==='string')l=lang;}catch(e){}if(!l)l=document.documentElement.lang||'ja';const u=(l.slice(0,2)==='ja'?NQ.q.ja:NQ.q.en)||'';return /^https:\/\/x\.com\/[A-Za-z0-9_]{1,15}\/status\/\d{5,25}$/.test(u)?u:'';}
+function xIntent(text,url){const q=quoteURL();return 'https://x.com/intent/post?text='+encodeURIComponent(q?text+'\n'+url:text)+'&url='+encodeURIComponent(q||url);}
+function xIntentT(text){const q=quoteURL();return 'https://x.com/intent/post?text='+encodeURIComponent(text)+(q?'&url='+encodeURIComponent(q):'');}
+function nqS(o){const q=quoteURL();if(!q||!o)return o;o=Object.assign({},o);o.text=(o.text||'')+(o.url?'\n'+o.url:'')+'\n'+q;delete o.url;return o;}
 (function () {
   'use strict';
   const C = HT.CONFIG, T = HT.TILE, W = C.W, H = C.H;
@@ -1441,7 +1448,7 @@
   $('btn-copy').onclick = () => {
     const code = $('wait-code').textContent, url = inviteUrl(code);
     const text = tr('share_text', { code });
-    if (navigator.share) { navigator.share({ title: tr('doc_title'), text, url }).catch(() => {}); return; }
+    if (navigator.share) { navigator.share(nqS({ title: tr('doc_title'), text, url })).catch(() => {}); return; }
     (navigator.clipboard ? navigator.clipboard.writeText(text + '\n' + url) : Promise.reject()).then(() => toast(tr('link_copied'))).catch(() => toast(url, 5000));
   };
 
