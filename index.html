@@ -65,6 +65,9 @@ s.f.style.visibility='visible';s.f.style.pointerEvents=pe;if(s.f2){s.f2.style.vi
 function go(){place();try{new MutationObserver(place).observe(document.body,{childList:true,subtree:true});}catch(_){}setInterval(tick,300);}
 if(document.body)go();else document.addEventListener('DOMContentLoaded',go);
 }catch(e){}})();</script>
+<!-- nasubi-next: 結果画面に「次のゲーム」を出す（右にスライドするか押すと、おすすめの画面。中身は nasubi-no-oniwa.github.io/next/next.js で全作品共通） -->
+<script>window.NSB_NEXT={"g": "hanetank", "r": [{"a": "#result .result-box", "v": "#result"}], "ad": 1};</script>
+<script src="https://nasubi-no-oniwa.github.io/next/next.js" defer></script>
 </head>
 <body>
 <canvas id="view"></canvas>
